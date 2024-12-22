@@ -14,7 +14,7 @@ export class LottoController {
   @Get('latest-round')
   async getLatestRound() {
     const latestRound = await this.lottoService.getLatestRound();
-    return { latestRound };
+    return latestRound
   }
 
   // 가장 최근 5개의 회차
