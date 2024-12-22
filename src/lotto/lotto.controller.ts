@@ -10,4 +10,18 @@ export class LottoController {
   getLottoDraw(@Query('drwNo') drawNumber: string) {
     return this.lottoService.fetchLottoDraw(drawNumber);
   }
+
+  @Get('latest-round')
+  async getLatestRound() {
+    const latestRound = await this.lottoService.getLatestRound();
+    return { latestRound };
+  }
+
+  // 가장 최근 5개의 회차
+  @Get('latest-rounds')
+  async getLatestRounds() {
+    const latestRound = await this.lottoService.getLatestRound();
+
+    return Array.from({length : 5}, (_, i) => latestRound - i)
+  }
 }

@@ -20,4 +20,27 @@ export class LottoService {
       );
     }
   }
+
+  private async isValidRound(drwNo: number): Promise<boolean> {
+    try {
+      const response = await axios.get(
+        `${this.lottoApiUrl}&drwNo=${drwNo}`,
+      );
+      if(response.data.returnValue === 'fail') return false
+      return response.status === 200
+    } catch {
+      return false;
+    }
+  }
+
+  async getLatestRound(): Promise<number> {
+    let round = 1000; // 시작 회차 (적당히 과거 회차로 설정)
+    while (true) {
+      const isValid = await this.isValidRound(round + 1);
+      if (!isValid) break;
+      round++;
+    }
+    
+    return round
+  }
 }
