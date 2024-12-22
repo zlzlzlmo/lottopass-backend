@@ -1,5 +1,5 @@
 // lotto.controller.ts
-import { Controller, Get, Query } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { LottoService } from './lotto.service';
 
 @Controller('lotto')
@@ -9,6 +9,11 @@ export class LottoController {
   @Get('draw')
   getLottoDraw(@Query('drwNo') drawNumber: string) {
     return this.lottoService.fetchLottoDraw(drawNumber);
+  }
+
+  @Post('latest-rounds-numbers')
+  getLottoDraws(@Body('drwNos') drawNumbers: string[]) {
+    return this.lottoService.fetchLottoDraws(drawNumbers);
   }
 
   @Get('latest-round')

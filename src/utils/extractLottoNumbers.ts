@@ -1,4 +1,4 @@
-export const extractLottoNumbers = (data: Record<string, any>, startWith: string): number[] => {
+export const extractKeyValuesBy = (data: Record<string, any>, startWith: string): number[] => {
     return Object.keys(data)
       .filter((key) => key.startsWith(startWith)) // 'drwtNo'로 시작하는 키만 필터링
       .sort((a, b) =>  a.localeCompare(b)) // 숫자 순서로 정렬

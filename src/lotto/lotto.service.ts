@@ -1,6 +1,7 @@
 // lotto.service.ts
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import axios from 'axios';
+import { extractKeyValuesBy } from 'src/utils/extractLottoNumbers';
 
 @Injectable()
 export class LottoService {
@@ -21,6 +22,25 @@ export class LottoService {
     }
   }
 
+  async fetchLottoDraws(drawNumbers: string[]): Promise<any[]> {
+    try {
+      const promises = drawNumbers.map((drawNumber) =>
+        axios.get(`${this.lottoApiUrl}&drwNo=${drawNumber}`)
+      );
+  
+      const responses = await Promise.all(promises);
+      const results = responses.map((response) => extractKeyValuesBy(response.data, 'drwtNo')
+    );
+    
+      return results;
+    } catch (error) {
+      throw new HttpException(
+        'Failed to fetch lotto data',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+  
   private async isValidRound(drwNo: number): Promise<boolean> {
     try {
       const response = await axios.get(
@@ -40,7 +60,7 @@ export class LottoService {
       if (!isValid) break;
       round++;
     }
-    
+
     return round
   }
 }
