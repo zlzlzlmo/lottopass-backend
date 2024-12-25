@@ -16,21 +16,14 @@ export class LottoService {
 
   // 단일 회차 데이터 가져오기
   async fetchLottoDraw(drawNumber: number): Promise<LottoDrawEntity> {
-    // 1. 데이터베이스에서 해당 회차 데이터 조회
     const cachedData = await this.lottoRepository.findOneBy({ drawNumber });
-    if (cachedData) {
-      console.log(`Cache hit for draw number: ${drawNumber}`);
-      return cachedData; // 데이터베이스에 있으면 반환
-    }
-  
-    // 2. 데이터베이스에 없으면 외부 API에서 데이터 가져오기
+    if (cachedData) return cachedData;
+
     const response = await axios.get(`${this.lottoApiUrl}&drwNo=${drawNumber}`);
-  
     if (response.data.returnValue === 'fail') {
       throw new Error(`Invalid draw number: ${drawNumber}`);
     }
-  
-    // 3. 가져온 데이터를 엔티티로 매핑
+
     const mappedData: LottoDrawEntity = this.lottoRepository.create({
       drawNumber: response.data.drwNo,
       date: response.data.drwNoDate,
@@ -50,32 +43,42 @@ export class LottoService {
         firstPrizeWinnerCount: response.data.firstPrzwnerCo,
       },
     });
-  
-    // 4. 데이터베이스에 저장
+
     await this.lottoRepository.save(mappedData);
-    return mappedData; // 저장된 데이터를 반환
+    return mappedData;
   }
-      
+
   // 여러 회차 데이터 가져오기
   async fetchLottoDraws(drawNumbers: number[]): Promise<LottoDrawEntity[]> {
-    const results: LottoDrawEntity[] = [];
-
-    for (const drawNumber of drawNumbers) {
-      const data = await this.fetchLottoDraw(drawNumber);
-      results.push(data);
-    }
-
-    return results;
+    const promises = drawNumbers.map((drawNumber) =>
+      this.fetchLottoDraw(drawNumber),
+    );
+    return Promise.all(promises);
   }
 
   // 최신 회차 번호 가져오기
   async getLatestRound(): Promise<number> {
-    let round = 1000; // 시작 회차
+    // 데이터베이스에서 최신 회차 번호 조회
+    const latestStoredDraw = await this.lottoRepository.find({
+      order: { drawNumber: 'DESC' }, // 최신 회차 번호 기준으로 정렬
+      take: 1, // 가장 최신 데이터 한 건만 가져오기
+    });
+  
+    // 저장된 최신 회차 번호가 없으면 초기값으로 1000 설정
+    const latestDrawNumber = latestStoredDraw.length > 0 ? latestStoredDraw[0].drawNumber : 1000;
+  
+    console.log(`Latest stored draw number: ${latestDrawNumber}`);
+  
+    let round = latestDrawNumber;
+  
+    // 최신 데이터 이후 회차 번호 확인
     while (true) {
       const response = await axios.get(`${this.lottoApiUrl}&drwNo=${round + 1}`);
       if (response.data.returnValue === 'fail') break;
       round++;
     }
-    return round;
-  }
+  
+    return round; // 최신 회차 번호 반환
+  }  
 }
+
