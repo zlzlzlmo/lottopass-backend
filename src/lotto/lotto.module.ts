@@ -1,8 +1,7 @@
-// lotto.module.ts
 import { Module } from '@nestjs/common';
-import { LottoController } from './lotto.controller';
-import { LottoService } from './lotto.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { LottoService } from './lotto.service';
+import { LottoController } from './lotto.controller';
 import { LottoDrawEntity } from './lotto-draw.entity';
 
 @Module({

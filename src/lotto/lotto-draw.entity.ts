@@ -1,7 +1,8 @@
+import { LottoDraw } from 'lottopass-shared';
 import { Entity, PrimaryColumn, Column } from 'typeorm';
 
 @Entity('lotto_draws')
-export class LottoDrawEntity {
+export class LottoDrawEntity implements LottoDraw{
   @PrimaryColumn()
   drawNumber: number;
 

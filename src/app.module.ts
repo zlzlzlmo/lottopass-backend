@@ -1,22 +1,31 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { LottoModule } from './lotto/lotto.module';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { LottoModule } from './lotto/lotto.module'; // LottoModule 추가
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: '127.0.0.1', // IPv4 주소
-      port: 3306, // MySQL 포트
-      username: 'root',
-      password: '', // 비밀번호 설정 (필요시)
-      database: 'lotto',
-      entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: true,
-    }),    
-  LottoModule],
+    ConfigModule.forRoot({
+      envFilePath: `.env.${process.env.NODE_ENV || 'development'}`, // 환경 파일 로드
+    }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        type: 'mysql',
+        host: '127.0.0.1',
+        port: 3306,
+        username: 'root',
+        password: '',
+        database: 'lotto',
+        entities: [__dirname + '/**/*.entity{.ts,.js}'],
+        synchronize: configService.get<boolean>('DB_SYNCHRONIZE'), // 환경 변수로 설정
+      }),
+      inject: [ConfigService],
+    }),
+    LottoModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
