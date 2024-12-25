@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { HttpExceptionFilter } from './filters/http-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -11,6 +12,8 @@ async function bootstrap() {
       credentials: true, // 쿠키 인증 정보 전송 허용
     });
   
+    app.useGlobalFilters(new HttpExceptionFilter());
+
   await app.listen(3000);
 }
 bootstrap();
