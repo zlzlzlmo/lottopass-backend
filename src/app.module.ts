@@ -8,19 +8,20 @@ import { LottoModule } from './lotto/lotto.module'; // LottoModule 추가
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: `.env.${process.env.NODE_ENV || 'development'}`, // 환경 파일 로드
+      isGlobal: true,
+      envFilePath: process.env.NODE_ENV ? `.env.${process.env.NODE_ENV}` : '.env',
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         type: 'mysql',
-        host: configService.get<string>('DB_HOST', '127.0.0.1'),
-        port: configService.get<number>('DB_PORT', 3306),
-        username: configService.get<string>('DB_USERNAME', 'root'),
-        password: configService.get<string>('DB_PASSWORD', ''),
-        database: configService.get<string>('DB_DATABASE', 'lotto'),
+        host: configService.get<string>('MYSQLHOST'), // Railway 환경 변수
+        port: configService.get<number>('MYSQLPORT', 3306),
+        username: configService.get<string>('MYSQLUSER'),
+        password: configService.get<string>('MYSQLPASSWORD'),
+        database: configService.get<string>('MYSQLDATABASE'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: configService.get<boolean>('DB_SYNCHRONIZE', false), // 환경 변수로 설정
+        synchronize: configService.get<boolean>('DB_SYNCHRONIZE', false), // 프로덕션에서는 false 권장
       }),
       inject: [ConfigService],
     }),
