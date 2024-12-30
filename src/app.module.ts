@@ -14,13 +14,13 @@ import { LottoModule } from './lotto/lotto.module'; // LottoModule 추가
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         type: 'mysql',
-        host: '127.0.0.1',
-        port: 3306,
-        username: 'root',
-        password: '',
-        database: 'lotto',
+        host: configService.get<string>('DB_HOST', '127.0.0.1'),
+        port: configService.get<number>('DB_PORT', 3306),
+        username: configService.get<string>('DB_USERNAME', 'root'),
+        password: configService.get<string>('DB_PASSWORD', ''),
+        database: configService.get<string>('DB_DATABASE', 'lotto'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: configService.get<boolean>('DB_SYNCHRONIZE'), // 환경 변수로 설정
+        synchronize: configService.get<boolean>('DB_SYNCHRONIZE', false), // 환경 변수로 설정
       }),
       inject: [ConfigService],
     }),
