@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
 import { LottoService } from './lotto.service';
 import { FindAllResponse } from 'lottopass-shared';
 
@@ -6,8 +6,13 @@ import { FindAllResponse } from 'lottopass-shared';
 export class LottoController {
   constructor(private readonly lottoService: LottoService) {}
 
+  @Get()
+  getAllLotto() {
+    return { message: 'Lotto endpoint works!' };
+  }
+
   @Get('draw/:drawNumber')
-  async getLottoDraw(@Param('drawNumber') drawNumber: number): Promise<FindAllResponse> {
+  async getLottoDraw(@Param('drawNumber', ParseIntPipe) drawNumber: number): Promise<FindAllResponse> {
     const data = await this.lottoService.fetchLottoDraw(drawNumber);
     return {
       status: 'success',
