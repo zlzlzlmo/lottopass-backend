@@ -10,9 +10,7 @@ async function bootstrap() {
 
   // CORS 설정
   app.enableCors({
-    origin: isProduction
-      ? process.env.CORS_ORIGIN || 'https://production-domain.com'
-      : 'http://localhost:5173',
+    origin: 'http://localhost:5173',
     methods: 'GET,POST,PUT,DELETE',
     credentials: true,
   });
