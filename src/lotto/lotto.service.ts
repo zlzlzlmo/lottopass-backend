@@ -50,10 +50,24 @@ export class LottoService {
 
   // 여러 회차 데이터 가져오기
   async fetchLottoDraws(drawNumbers: number[]): Promise<LottoDrawEntity[]> {
-    const promises = drawNumbers.map((drawNumber) =>
-      this.fetchLottoDraw(drawNumber),
+
+    const results = await this.lottoRepository.find({
+      order: { drawNumber: 'ASC' },
+    });
+
+    const missingDrawNumbers = drawNumbers.filter(
+      (number) => !results.some((result) => result.drawNumber === number),
     );
-    return Promise.all(promises);
+  
+    if (missingDrawNumbers.length > 0) {
+      
+      const missingData = await Promise.all(
+        missingDrawNumbers.map((drawNumber) => this.fetchLottoDraw(drawNumber)),
+      );
+      results.push(...missingData);
+    }
+  
+    return results;
   }
 
   // 최신 회차 번호 가져오기
