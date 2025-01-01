@@ -10,7 +10,7 @@ async function bootstrap() {
 
   // CORS 설정
   app.enableCors({
-    origin: ['http://localhost:5173','https://lottopass-frontend-production.up.railway.app'],
+    origin: ['http://localhost:5173','https://lottopass-frontend.vercel.app'],
     methods: 'GET,POST,PUT,DELETE',
     credentials: true,
   });
