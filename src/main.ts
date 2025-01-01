@@ -10,7 +10,7 @@ async function bootstrap() {
 
   // CORS 설정
   app.enableCors({
-    origin: ['http://localhost:5173','https://lottopass-frontend.vercel.app'],
+    origin: ['http://localhost:5173','https://lottopass-frontend.vercel.app','https://www.lottopass.co.kr'],
     methods: 'GET,POST,PUT,DELETE',
     credentials: true,
   });
