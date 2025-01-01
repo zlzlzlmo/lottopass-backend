@@ -22,13 +22,8 @@ export class LottoController {
 
   @Get('all')
   async getAllLottoDraws(): Promise<FindAllResponse<LottoDraw[]>> {
-    const latestRound = await this.lottoService.getLatestRound();
-    const drawNumbers = Array.from({ length: latestRound }, (_, i) => i + 1);
-    const data = await this.lottoService.fetchLottoDraws(drawNumbers);
-    return {
-      status: 'success',
-      data,
-    };
+    const data = await this.lottoService.fetchAllLottoDraws();
+    return { status: 'success', data };
   }
 
   @Get('latest')
