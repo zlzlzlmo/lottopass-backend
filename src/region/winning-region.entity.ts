@@ -5,7 +5,7 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { UniqueRegionEntity } from './unique-region.entitiy';
+import { UniqueRegionEntity } from './unique-region.entity';
 
 @Entity('winning_regions')
 export class WinningRegionEntity {

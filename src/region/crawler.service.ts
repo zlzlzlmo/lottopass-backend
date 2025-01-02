@@ -8,7 +8,7 @@ import { Repository } from 'typeorm';
 import { WinningRegionEntity } from './winning-region.entity'; // 엔티티 경로
 import { LottoService } from 'src/lotto/lotto.service';
 import { Cron } from '@nestjs/schedule';
-import { UniqueRegionEntity } from './unique-region.entitiy';
+import { UniqueRegionEntity } from './unique-region.entity';
 
 @Injectable()
 export class LottoCrawlerService {

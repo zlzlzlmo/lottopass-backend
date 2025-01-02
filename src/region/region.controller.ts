@@ -2,7 +2,7 @@ import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
 import { LottoCrawlerService } from './crawler.service';
 import { FindAllResponse } from 'lottopass-shared';
 import { WinningRegionEntity } from './winning-region.entity';
-import { UniqueRegionEntity } from './unique-region.entitiy';
+import { UniqueRegionEntity } from './unique-region.entity';
 
 @Controller('region')
 export class RegionController {
