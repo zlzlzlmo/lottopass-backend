@@ -8,6 +8,7 @@ import { LottoModule } from 'src/lotto/lotto.module';
 import { LottoService } from 'src/lotto/lotto.service';
 import { LottoDrawEntity } from 'src/lotto/lotto-draw.entity';
 import { UniqueRegionEntity } from './unique-region.entity';
+import { RegionService } from './region.service';
 
 @Module({
   imports: [
@@ -20,6 +21,6 @@ import { UniqueRegionEntity } from './unique-region.entity';
     LottoModule,
   ],
   controllers: [RegionController],
-  providers: [LottoCrawlerService, LottoService],
+  providers: [LottoCrawlerService, LottoService, RegionService],
 })
 export class RegionModule {}
