@@ -127,4 +127,41 @@ export class LottoCrawlerService {
   setUniqueIdentifier(drawNumber: number, store: string) {
     return `${drawNumber}${store}`;
   }
+
+  async fetchDrawData(drawNumber: number): Promise<any> {
+    try {
+      const BASE_URL = 'https://www.dhlottery.co.kr/gameResult.do?method=byWin';
+
+      const url = `${BASE_URL}&drwNo=${drawNumber}`;
+      const html = await this.fetchPage(url); // 디코딩된 HTML 가져오기
+      const $ = cheerio.load(html);
+      const prizes = [];
+
+      // 순위별 정보 추출
+      $('#article > div:nth-child(2) > div > table > tbody > tr').each(
+        (index, element) => {
+          const rank = $(element).find('td:nth-child(1)').text().trim();
+          const totalPrize = $(element).find('td:nth-child(2)').text().trim();
+          const winnerCount = $(element).find('td:nth-child(3)').text().trim();
+          const prizePerWinner = $(element)
+            .find('td:nth-child(4)')
+            .text()
+            .trim();
+
+          prizes.push({
+            drawNumber,
+            rank,
+            totalPrize,
+            winnerCount,
+            prizePerWinner,
+          });
+        }
+      );
+
+      return prizes;
+    } catch (error) {
+      console.error(`Failed to fetch data for draw #${drawNumber}`, error);
+      return [];
+    }
+  }
 }

@@ -40,4 +40,11 @@ export class RegionController {
     }
     return this.regionService.findByLocation(province, city);
   }
+
+  @Get('test/:drawNumber')
+  async getTest(@Param('drawNumber', ParseIntPipe) drawNumber: number) {
+    const res = await this.crawlerService.fetchDrawData(drawNumber);
+    console.log('res : ', res);
+    return res;
+  }
 }
