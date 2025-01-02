@@ -16,7 +16,7 @@ export class LottoService {
 
   constructor(
     @InjectRepository(LottoDrawEntity)
-    private readonly lottoRepository: Repository<LottoDrawEntity>,
+    private readonly lottoRepository: Repository<LottoDrawEntity>
   ) {
     this.apiClient = axios.create({
       timeout: 5000, // 요청 타임아웃 5초
@@ -29,7 +29,9 @@ export class LottoService {
     if (existingData) return existingData;
 
     try {
-      const response = await this.apiClient.get(`${this.lottoApiUrl}&drwNo=${drawNumber}`);
+      const response = await this.apiClient.get(
+        `${this.lottoApiUrl}&drwNo=${drawNumber}`
+      );
       if (response.data.returnValue === 'fail') {
         throw new Error(`Invalid draw number: ${drawNumber}`);
       }
@@ -56,10 +58,9 @@ export class LottoService {
       order: { drawNumber: 'DESC' },
       take: 1,
     });
-  
+
     return results[0].drawNumber;
   }
-  
 
   // 최신 데이터 가져오기 및 저장
   async fetchAndSaveLatestRound(): Promise<void> {
@@ -72,7 +73,9 @@ export class LottoService {
     let attempt = 0;
     while (attempt < this.maxRetryAttempts) {
       try {
-        const response = await this.apiClient.get(`${this.lottoApiUrl}&drwNo=${latestDrawNumber + 1}`);
+        const response = await this.apiClient.get(
+          `${this.lottoApiUrl}&drwNo=${latestDrawNumber + 1}`
+        );
         if (response.data.returnValue === 'fail') {
           this.logger.log('No new draw available yet.');
           return;
@@ -84,7 +87,10 @@ export class LottoService {
         return;
       } catch (error) {
         attempt++;
-        this.handleApiError(error, `Attempt ${attempt}: Failed to fetch latest draw`);
+        this.handleApiError(
+          error,
+          `Attempt ${attempt}: Failed to fetch latest draw`
+        );
         if (attempt >= this.maxRetryAttempts) {
           this.logger.error('Max retry attempts reached. Aborting...');
           return;

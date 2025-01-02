@@ -21,8 +21,9 @@
     "strict": true,
     "skipLibCheck": true
   },
-  "baseUrl": ".",                 // 경로 설정
-  "paths": {                      // 모듈 경로 매핑
+  "baseUrl": ".", // 경로 설정
+  "paths": {
+    // 모듈 경로 매핑
     "*": ["node_modules/*"]
   },
   "include": ["src/**/*"]

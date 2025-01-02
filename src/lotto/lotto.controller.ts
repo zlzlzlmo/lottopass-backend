@@ -12,7 +12,9 @@ export class LottoController {
   }
 
   @Get('draw/:drawNumber')
-  async getLottoDraw(@Param('drawNumber', ParseIntPipe) drawNumber: number): Promise<FindAllResponse<LottoDraw[]>> {
+  async getLottoDraw(
+    @Param('drawNumber', ParseIntPipe) drawNumber: number
+  ): Promise<FindAllResponse<LottoDraw[]>> {
     const data = await this.lottoService.fetchLottoDraw(drawNumber);
     return {
       status: 'success',
