@@ -115,6 +115,10 @@ export class LottoCrawlerService {
     }
   }
 
+  async getAllRegions(): Promise<UniqueRegionEntity[]> {
+    return await this.uniqueRegionRepository.find();
+  }
+
   // 매주 토요일 오후 9시에 실행
   @Cron('0 21 * * 6')
   async scheduleCrawl(): Promise<void> {
