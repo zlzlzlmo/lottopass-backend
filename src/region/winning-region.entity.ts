@@ -6,9 +6,9 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { UniqueRegionEntity } from './unique-region.entity';
-
+import { WinningRegion } from 'lottopass-shared';
 @Entity('winning_regions')
-export class WinningRegionEntity {
+export class WinningRegionEntity implements WinningRegion {
   @PrimaryGeneratedColumn()
   id: number;
 
