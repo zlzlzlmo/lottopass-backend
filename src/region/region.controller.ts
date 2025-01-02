@@ -7,12 +7,6 @@ import { WinningRegionEntity } from './winning-region.entity';
 export class RegionController {
   constructor(private readonly regionService: LottoCrawlerService) {}
 
-  @Get('crawl')
-  async crawl(): Promise<FindAllResponse<WinningRegionEntity[]>> {
-    const data = await this.regionService.crawlAllFirstPrize();
-    return { status: 'success', data };
-  }
-
   @Get('crawl/:drawNumber')
   async oneCrawl(
     @Param('drawNumber', ParseIntPipe) drawNumber: number

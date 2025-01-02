@@ -1,4 +1,4 @@
-import { Injectable, Controller, Get } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import * as cheerio from 'cheerio';
 import axios from 'axios';
 import * as iconv from 'iconv-lite';
@@ -8,6 +8,7 @@ import { Repository } from 'typeorm';
 import { WinningRegionEntity } from './winning-region.entity'; // 엔티티 경로
 import { LottoService } from 'src/lotto/lotto.service';
 import { Cron } from '@nestjs/schedule';
+import { UniqueRegionEntity } from './unique-region.entitiy';
 
 @Injectable()
 export class LottoCrawlerService {
@@ -17,6 +18,8 @@ export class LottoCrawlerService {
   constructor(
     @InjectRepository(WinningRegionEntity)
     private readonly winningRegionRepository: Repository<WinningRegionEntity>,
+    @InjectRepository(UniqueRegionEntity)
+    private readonly uniqueRegionRepository: Repository<UniqueRegionEntity>,
     private readonly lottoService: LottoService
   ) {}
 
@@ -46,6 +49,12 @@ export class LottoCrawlerService {
         const result = await getCoordinatesAndRegionFromKakao(address);
 
         if (result) {
+          // Unique region 추가 확인
+          await this.ensureUniqueRegion(
+            result.region.province,
+            result.region.city
+          );
+
           data.push({
             drawNumber: parseInt(drawNumber),
             storeName: name,
@@ -67,16 +76,15 @@ export class LottoCrawlerService {
     return data;
   }
 
-  async crawlAllFirstPrize(): Promise<WinningRegionEntity[]> {
-    const results: WinningRegionEntity[] = [];
-    const latestDrawNumber = await this.lottoService.getLatestRound();
+  async ensureUniqueRegion(province: string, city: string): Promise<void> {
+    const exists = await this.uniqueRegionRepository.findOne({
+      where: { province, city },
+    });
 
-    for (let i = 1; i <= latestDrawNumber; i++) {
-      const crawled = await this.crawlFirstPrize(i);
-      results.push(crawled);
+    if (!exists) {
+      const newRegion = this.uniqueRegionRepository.create({ province, city });
+      await this.uniqueRegionRepository.save(newRegion);
     }
-
-    return results;
   }
 
   async crawlFirstPrize(drawNumber: number): Promise<WinningRegionEntity> {

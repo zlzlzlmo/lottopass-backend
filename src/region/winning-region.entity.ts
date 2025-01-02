@@ -1,4 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
+import { UniqueRegionEntity } from './unique-region.entitiy';
 
 @Entity('winning_regions')
 export class WinningRegionEntity {
@@ -9,16 +16,16 @@ export class WinningRegionEntity {
   drawNumber: number;
 
   @Column()
-  province: string; // 도/광역시
-
-  @Column()
-  city: string; // 시/구
-
-  @Column()
-  district: string; // 동/읍/면
-
-  @Column()
   storeName: string;
+
+  @Column()
+  province: string;
+
+  @Column()
+  city: string;
+
+  @Column()
+  district: string;
 
   @Column({ type: 'varchar', nullable: true })
   method: string;
@@ -31,4 +38,8 @@ export class WinningRegionEntity {
 
   @Column({ type: 'varchar', unique: true })
   uniqueIdentifier: string;
+
+  @ManyToOne(() => UniqueRegionEntity)
+  @JoinColumn({ name: 'unique_region_id' })
+  uniqueRegion: UniqueRegionEntity;
 }
