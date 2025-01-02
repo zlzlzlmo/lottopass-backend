@@ -1,8 +1,6 @@
 {
   "singleQuote": true,
-  "trailingComma": "all",
-  "semi": true,          // 명령 끝에 세미콜론 사용
-  "singleQuote": true,   // 문자열에 단일 따옴표 사용
-  "tabWidth": 2,         // 들여쓰기 너비 설정
-  "trailingComma": "all" // 여러 줄에서 마지막 콤마 사용
+  "trailingComma": "es5",
+  "tabWidth": 2,
+  "semi": true
 }

@@ -10,18 +10,24 @@ async function bootstrap() {
 
   // CORS 설정
   app.enableCors({
-    origin: ['http://localhost:5173','https://lottopass-frontend.vercel.app','https://www.lottopass.co.kr'],
+    origin: [
+      'http://localhost:5173',
+      'https://lottopass-frontend.vercel.app',
+      'https://www.lottopass.co.kr',
+    ],
     methods: 'GET,POST,PUT,DELETE',
     credentials: true,
   });
 
   // Global Filters 및 Pipes 설정
   app.useGlobalFilters(new HttpExceptionFilter());
-  app.useGlobalPipes(new ValidationPipe({
-    whitelist: true,
-    forbidNonWhitelisted: true,
-    transform: true,
-  }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    })
+  );
 
   // 포트 설정
   const PORT = process.env.PORT || 3000;

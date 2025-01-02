@@ -83,11 +83,13 @@ npm install
 ### 5. 서버 실행
 
 #### 개발 서버 실행
+
 ```bash
 npm run start:dev
 ```
 
 #### 프로덕션 빌드 및 실행
+
 ```bash
 npm run build
 npm run start:prod
@@ -98,6 +100,7 @@ npm run start:prod
 ## 📡 **API 명세**
 
 ### 1. 전체 로또 추첨 데이터 가져오기
+
 - **URL**: `/api/lotto/all`
 - **Method**: `GET`
 - **Response**:
@@ -122,6 +125,7 @@ npm run start:prod
   ```
 
 ### 2. 특정 회차 로또 데이터 가져오기
+
 - **URL**: `/api/lotto/draw/:drawNumber`
 - **Method**: `GET`
 - **Response**:
@@ -144,6 +148,7 @@ npm run start:prod
   ```
 
 ### 3. 최신 로또 데이터 가져오기
+
 - **URL**: `/api/lotto/latest`
 - **Method**: `GET`
 - **Response**:
@@ -180,4 +185,3 @@ npm run start:prod
 프로젝트와 관련된 문의 사항은 다음 이메일로 연락주세요:
 
 - Email: [zlzlzlmo60@gmail.com](mailto:zlzlzlmo60@gmail.com)
-
