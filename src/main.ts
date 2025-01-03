@@ -6,15 +6,28 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [];
   const isProduction = process.env.NODE_ENV === 'production';
 
   // CORS 설정
   app.enableCors({
-    origin: [
-      'http://localhost:5173',
-      'https://lottopass-frontend.vercel.app',
-      'https://www.lottopass.co.kr',
-    ],
+    origin: (origin, callback) => {
+      // 프로덕션 환경: 명시된 도메인만 허용
+      if (isProduction) {
+        if (allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error('Not allowed by CORS'));
+        }
+      } else {
+        // 개발 환경: localhost 허용
+        if (!origin || origin.includes('localhost')) {
+          callback(null, true);
+        } else {
+          callback(new Error('Not allowed by CORS'));
+        }
+      }
+    },
     methods: 'GET,POST,PUT,DELETE',
     credentials: true,
   });
