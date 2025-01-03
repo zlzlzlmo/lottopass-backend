@@ -40,4 +40,12 @@ export class RegionController {
     }
     return this.regionService.findByLocation(province, city);
   }
+
+  @Get('winning/:drawNumber')
+  async getWinningRegionsByDrawNumber(
+    @Param('drawNumber', ParseIntPipe) drawNumber: number
+  ) {
+    const res = await this.regionService.findByDrawNumber(drawNumber);
+    return res;
+  }
 }
