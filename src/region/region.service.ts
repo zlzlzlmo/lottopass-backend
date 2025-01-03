@@ -23,6 +23,13 @@ export class RegionService {
     });
   }
 
+  async findByDrawNumber(drawNumber: number): Promise<WinningRegionEntity[]> {
+    return this.winningRegionRepository.find({
+      where: { drawNumber },
+      relations: ['uniqueRegion'],
+    });
+  }
+
   async getAllRegions(): Promise<UniqueRegionEntity[]> {
     return await this.uniqueRegionRepository.find();
   }
