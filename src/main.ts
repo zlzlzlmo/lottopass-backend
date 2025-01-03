@@ -11,23 +11,11 @@ async function bootstrap() {
 
   // CORS 설정
   app.enableCors({
-    origin: (origin, callback) => {
-      // 프로덕션 환경: 명시된 도메인만 허용
-      if (isProduction) {
-        if (allowedOrigins.includes(origin)) {
-          callback(null, true);
-        } else {
-          callback(new Error('Not allowed by CORS'));
-        }
-      } else {
-        // 개발 환경: localhost 허용
-        if (!origin || origin.includes('localhost')) {
-          callback(null, true);
-        } else {
-          callback(new Error('Not allowed by CORS'));
-        }
-      }
-    },
+    origin: [
+      'http://localhost:5173',
+      'https://www.lottopass.co.kr',
+      'http://localhost:4173',
+    ],
     methods: 'GET,POST,PUT,DELETE',
     credentials: true,
   });
