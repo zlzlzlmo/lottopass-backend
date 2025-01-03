@@ -1,6 +1,6 @@
 import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
 import { LottoCrawlerService } from './crawler.service';
-import { FindAllResponse } from 'lottopass-shared';
+import { FindAllResponse, UniqueRegion, WinningRegion } from 'lottopass-shared';
 import { WinningRegionEntity } from './winning-region.entity';
 import { UniqueRegionEntity } from './unique-region.entity';
 import { RegionService } from './region.service';
@@ -15,13 +15,13 @@ export class RegionController {
   @Get('crawl/:drawNumber')
   async oneCrawl(
     @Param('drawNumber', ParseIntPipe) drawNumber: number
-  ): Promise<FindAllResponse<WinningRegionEntity>> {
+  ): Promise<FindAllResponse<WinningRegion>> {
     const data = await this.crawlerService.crawlFirstPrize(drawNumber);
     return { status: 'success', data };
   }
 
   @Get('unique/all')
-  async getAllRegions(): Promise<FindAllResponse<UniqueRegionEntity[]>> {
+  async getAllRegions(): Promise<FindAllResponse<UniqueRegion[]>> {
     const data = await this.regionService.getAllRegions();
 
     return {
@@ -33,10 +33,10 @@ export class RegionController {
   @Get('winning')
   async getWinningRegionsByLocation(
     @Query('province') province: string,
-    @Query('city') city: string
-  ): Promise<WinningRegionEntity[]> {
-    if (!province || !city) {
-      throw new Error('Province and City parameters are required.');
+    @Query('city') city?: string
+  ): Promise<WinningRegion[]> {
+    if (!province) {
+      throw new Error('Province parameter is required.');
     }
     return this.regionService.findByLocation(province, city);
   }

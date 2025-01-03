@@ -15,10 +15,16 @@ export class RegionService {
 
   async findByLocation(
     province: string,
-    city: string
+    city?: string
   ): Promise<WinningRegionEntity[]> {
+    const whereCondition: Record<string, any> = { province };
+
+    if (city) {
+      whereCondition.city = city;
+    }
+
     return this.winningRegionRepository.find({
-      where: { province, city },
+      where: whereCondition,
       relations: ['uniqueRegion'],
     });
   }
