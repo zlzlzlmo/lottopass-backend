@@ -4,8 +4,21 @@ import { Repository } from 'typeorm';
 import { WinningRegionEntity } from './winning-region.entity';
 import { UniqueRegionEntity } from './unique-region.entity';
 import axios from 'axios';
-import * as cheerio from 'cheerio';
+
 import iconv from 'iconv-lite';
+interface StoreInfo {
+  fullAddress: string;
+  latitude: number;
+  longitude: number;
+  storeName: string;
+  phone: string | null;
+}
+
+const decodeCustom = (text: string) => {
+  return text
+    .replace(/&&#35;40;/g, '(') // "&&#35;40;" → "("
+    .replace(/&&#35;41;/g, ')'); // "&&#35;41;" → ")"
+};
 
 @Injectable()
 export class RegionService {
@@ -75,10 +88,9 @@ export class RegionService {
       throw new Error('Failed to fetch store data');
     }
   }
-
-  async fetchAllStores(province: string, city: string): Promise<any[]> {
+  async fetchAllStores(province: string, city?: string): Promise<StoreInfo[]> {
     let currentPage = 1;
-    const allResults = [];
+    const allResults: StoreInfo[] = [];
     const BASE_URL =
       'https://dhlottery.co.kr/store.do?method=sellerInfo645Result';
 
@@ -86,33 +98,45 @@ export class RegionService {
       while (true) {
         const formData = new URLSearchParams();
         formData.append('searchType', '1');
-        formData.append('sltSIDO', province);
-        formData.append('sltGUGUN', city ?? '');
-        formData.append('nowPage', currentPage.toString());
+        formData.append('sltSIDO', province); // 도/시
+        formData.append('sltGUGUN', city ?? ''); // 시/구
+        formData.append('nowPage', currentPage.toString()); // 현재 페이지
 
         const response = await axios.post(BASE_URL, formData.toString(), {
-          responseType: 'arraybuffer',
+          responseType: 'arraybuffer', // 데이터를 버퍼로 수신
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
           },
         });
 
         const decodedData = iconv.decode(Buffer.from(response.data), 'EUC-KR');
-
         const result = JSON.parse(decodedData);
 
-        if (result.totalPage === 0) return [];
+        if (result.totalPage === 0) return []; // 결과가 없으면 빈 배열 반환
         if (result.arr && result.arr.length > 0) {
-          allResults.push(...result.arr);
+          const processedData = result.arr.map((store: any) => {
+            const fullAddress =
+              store.BPLCDORODTLADRES || // 도로명 주소가 있으면 사용
+              `${store.BPLCLOCPLC1} ${store.BPLCLOCPLC2} ${store.BPLCLOCPLC3} ${store.BPLCLOCPLCDTLADRES}`; // 풀네임 주소 구성
+
+            return {
+              fullAddress: fullAddress.trim(),
+              latitude: store.LATITUDE,
+              longitude: store.LONGITUDE,
+              storeName: decodeCustom(store.FIRMNM),
+              phone: store.RTLRSTRTELNO || null,
+            };
+          });
+
+          allResults.push(...processedData);
         }
 
-        if (result.nowPage === result.pageEnd) break;
+        if (result.nowPage === result.pageEnd) break; // 마지막 페이지라면 종료
         currentPage += 1;
       }
 
       return allResults;
     } catch (error) {
-      // console.error('Error fetching lotto store data:', error.message);
       throw new Error('Failed to fetch lotto store data');
     }
   }
