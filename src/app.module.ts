@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { LottoModule } from './lotto/lotto.module'; // LottoModule 추가
 import { ScheduleModule } from '@nestjs/schedule';
 import { RegionModule } from './region/region.module';
+import { DrawModule } from './draw/draw.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { RegionModule } from './region/region.module';
     }),
     LottoModule,
     RegionModule,
+    DrawModule,
   ],
   controllers: [AppController],
   providers: [AppService],
