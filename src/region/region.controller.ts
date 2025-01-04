@@ -4,11 +4,13 @@ import { FindAllResponse, UniqueRegion, WinningRegion } from 'lottopass-shared';
 import { WinningRegionEntity } from './winning-region.entity';
 import { UniqueRegionEntity } from './unique-region.entity';
 import { RegionService } from './region.service';
+import { CrawlerService } from 'src/crawler/crawler.service';
 
 @Controller('region')
 export class RegionController {
   constructor(
     private readonly crawlerService: LottoCrawlerService,
+    private readonly cService: CrawlerService,
     private readonly regionService: RegionService
   ) {}
 
@@ -47,5 +49,14 @@ export class RegionController {
   ) {
     const res = await this.regionService.findByDrawNumber(drawNumber);
     return res;
+  }
+
+  @Get('stores/:province')
+  async getAllStores(@Param('province') province: string): Promise<any[]> {
+    console.log('aad1');
+
+    console.log('DASfdasfasd');
+
+    return this.regionService.fetchAllPages(province);
   }
 }
