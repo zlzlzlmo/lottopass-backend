@@ -56,6 +56,8 @@ export class RegionController {
     @Query('province') province: string,
     @Query('city') city: string
   ): Promise<FindAllResponse<any[]>> {
+    if (!province || !city)
+      throw new Error('Province and City parameter is required');
     const data = await this.regionService.fetchAllStores(province, city);
     return {
       status: 'success',
