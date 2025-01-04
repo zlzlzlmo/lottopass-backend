@@ -76,7 +76,7 @@ export class RegionService {
     }
   }
 
-  async fetchAllPages(province: string): Promise<any[]> {
+  async fetchAllStores(province: string, city?: string): Promise<any[]> {
     let currentPage = 1;
     const allResults = [];
     const BASE_URL =
@@ -84,11 +84,10 @@ export class RegionService {
 
     try {
       while (true) {
-        console.log('pro : ', province);
         const formData = new URLSearchParams();
         formData.append('searchType', '1');
-        formData.append('sltSIDO', province); // 도/시
-        formData.append('sltGUGUN', ''); // 시/구 (필요 시 추가)
+        formData.append('sltSIDO', province);
+        formData.append('sltGUGUN', city ?? '');
         formData.append('nowPage', currentPage.toString());
 
         const response = await axios.post(BASE_URL, formData.toString(), {
@@ -99,17 +98,16 @@ export class RegionService {
         });
 
         const decodedData = iconv.decode(Buffer.from(response.data), 'EUC-KR');
+
         const result = JSON.parse(decodedData);
-        console.log('Res dafasd : ', result);
+
+        if (result.totalPage === 0) return [];
         if (result.arr && result.arr.length > 0) {
           allResults.push(...result.arr);
         }
-        console.log('asdfsadfsaxx');
-        if (!result.pageIsNext) {
-          break; // 다음 페이지가 없으면 종료
-        }
 
-        currentPage++;
+        if (result.nowPage === result.pageEnd) break;
+        currentPage += 1;
       }
 
       return allResults;

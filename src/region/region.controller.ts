@@ -51,12 +51,15 @@ export class RegionController {
     return res;
   }
 
-  @Get('stores/:province')
-  async getAllStores(@Param('province') province: string): Promise<any[]> {
-    console.log('aad1');
-
-    console.log('DASfdasfasd');
-
-    return this.regionService.fetchAllPages(province);
+  @Get('all-stores')
+  async getAllStores(
+    @Query('province') province: string,
+    @Query('city') city?: string
+  ): Promise<FindAllResponse<any[]>> {
+    const data = await this.regionService.fetchAllStores(province, city);
+    return {
+      status: 'success',
+      data,
+    };
   }
 }
