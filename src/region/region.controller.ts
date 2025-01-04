@@ -54,7 +54,7 @@ export class RegionController {
   @Get('all-stores')
   async getAllStores(
     @Query('province') province: string,
-    @Query('city') city?: string
+    @Query('city') city: string
   ): Promise<FindAllResponse<any[]>> {
     const data = await this.regionService.fetchAllStores(province, city);
     return {

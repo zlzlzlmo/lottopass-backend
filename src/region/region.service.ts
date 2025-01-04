@@ -76,7 +76,7 @@ export class RegionService {
     }
   }
 
-  async fetchAllStores(province: string, city?: string): Promise<any[]> {
+  async fetchAllStores(province: string, city: string): Promise<any[]> {
     let currentPage = 1;
     const allResults = [];
     const BASE_URL =
