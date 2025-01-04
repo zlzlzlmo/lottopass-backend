@@ -6,9 +6,6 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [];
-  const isProduction = process.env.NODE_ENV === 'production';
-
   // CORS 설정
   app.enableCors({
     origin: [

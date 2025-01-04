@@ -1,7 +1,8 @@
+import { DetailDraw } from 'lottopass-shared';
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
 @Entity('detail_draw')
-export class DetailDrawEntity {
+export class DetailDrawEntity implements DetailDraw {
   @PrimaryGeneratedColumn()
   id: number;
 
