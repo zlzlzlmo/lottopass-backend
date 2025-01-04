@@ -1,8 +1,11 @@
 import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
 import { LottoCrawlerService } from './crawler.service';
-import { FindAllResponse, UniqueRegion, WinningRegion } from 'lottopass-shared';
-import { WinningRegionEntity } from './winning-region.entity';
-import { UniqueRegionEntity } from './unique-region.entity';
+import {
+  FindAllResponse,
+  StoreInfo,
+  UniqueRegion,
+  WinningRegion,
+} from 'lottopass-shared';
 import { RegionService } from './region.service';
 import { CrawlerService } from 'src/crawler/crawler.service';
 
@@ -55,7 +58,7 @@ export class RegionController {
   async getAllStores(
     @Query('province') province: string,
     @Query('city') city?: string
-  ): Promise<FindAllResponse<any[]>> {
+  ): Promise<FindAllResponse<StoreInfo[]>> {
     if (!province) throw new Error('Province and City parameter is required');
     const data = await this.regionService.fetchAllStores(province, city);
     return {

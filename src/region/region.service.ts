@@ -6,18 +6,10 @@ import { UniqueRegionEntity } from './unique-region.entity';
 import axios from 'axios';
 
 import iconv from 'iconv-lite';
-interface StoreInfo {
-  fullAddress: string;
-  latitude: number;
-  longitude: number;
-  storeName: string;
-  phone: string | null;
-}
+import { StoreInfo } from 'lottopass-shared';
 
 const decodeCustom = (text: string) => {
-  return text
-    .replace(/&&#35;40;/g, '(') // "&&#35;40;" → "("
-    .replace(/&&#35;41;/g, ')'); // "&&#35;41;" → ")"
+  return text.replace(/&&#35;40;/g, '(').replace(/&&#35;41;/g, ')');
 };
 
 @Injectable()
@@ -56,38 +48,6 @@ export class RegionService {
     return await this.uniqueRegionRepository.find();
   }
 
-  async getTest(province: string, city?: string, page = 1) {
-    const BASE_URL =
-      'https://dhlottery.co.kr/store.do?method=sellerInfo645Result';
-    console.log('Testssad');
-    try {
-      const formData = new URLSearchParams();
-      formData.append('searchType', '1'); // 검색 유형
-      formData.append('sltSIDO', '경기'); // 도/시
-      formData.append('sltGUGUN', ''); // 시/구
-      formData.append('nowPage', '1'); // 페이지 번호
-
-      const response = await axios.post(BASE_URL, formData.toString(), {
-        responseType: 'arraybuffer',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-        },
-      });
-
-      console.log('res : ', response.data);
-      // 응답 데이터를 EUC-KR에서 UTF-8로 변환
-      const decodedData = iconv.decode(Buffer.from(response.data), 'EUC-KR');
-
-      // JSON 파싱
-      const result = JSON.parse(decodedData);
-      console.log('Decoded Result:', result);
-
-      return result;
-    } catch (error) {
-      console.error(`Error fetching stores for ${province} ${city}:`, error);
-      throw new Error('Failed to fetch store data');
-    }
-  }
   async fetchAllStores(province: string, city?: string): Promise<StoreInfo[]> {
     let currentPage = 1;
     const allResults: StoreInfo[] = [];
@@ -98,12 +58,12 @@ export class RegionService {
       while (true) {
         const formData = new URLSearchParams();
         formData.append('searchType', '1');
-        formData.append('sltSIDO', province); // 도/시
-        formData.append('sltGUGUN', city ?? ''); // 시/구
-        formData.append('nowPage', currentPage.toString()); // 현재 페이지
+        formData.append('sltSIDO', province);
+        formData.append('sltGUGUN', city ?? '');
+        formData.append('nowPage', currentPage.toString());
 
         const response = await axios.post(BASE_URL, formData.toString(), {
-          responseType: 'arraybuffer', // 데이터를 버퍼로 수신
+          responseType: 'arraybuffer',
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
           },
@@ -112,12 +72,12 @@ export class RegionService {
         const decodedData = iconv.decode(Buffer.from(response.data), 'EUC-KR');
         const result = JSON.parse(decodedData);
 
-        if (result.totalPage === 0) return []; // 결과가 없으면 빈 배열 반환
+        if (result.totalPage === 0) return [];
         if (result.arr && result.arr.length > 0) {
           const processedData = result.arr.map((store: any) => {
             const fullAddress =
-              store.BPLCDORODTLADRES || // 도로명 주소가 있으면 사용
-              `${store.BPLCLOCPLC1} ${store.BPLCLOCPLC2} ${store.BPLCLOCPLC3} ${store.BPLCLOCPLCDTLADRES}`; // 풀네임 주소 구성
+              store.BPLCDORODTLADRES ||
+              `${store.BPLCLOCPLC1} ${store.BPLCLOCPLC2} ${store.BPLCLOCPLC3} ${store.BPLCLOCPLCDTLADRES}`;
 
             return {
               fullAddress: fullAddress.trim(),
@@ -131,7 +91,7 @@ export class RegionService {
           allResults.push(...processedData);
         }
 
-        if (result.nowPage === result.pageEnd) break; // 마지막 페이지라면 종료
+        if (result.nowPage === result.pageEnd) break;
         currentPage += 1;
       }
 
