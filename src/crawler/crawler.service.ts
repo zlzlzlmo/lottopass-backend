@@ -5,15 +5,70 @@ import { DetailDrawEntity } from './detail-draw.entity';
 import * as cheerio from 'cheerio';
 import axios from 'axios';
 import * as iconv from 'iconv-lite';
-import * as puppeteer from 'puppeteer';
+import { WinningRegionEntity } from 'src/region/winning-region.entity';
+import { getCoordinatesAndRegionFromKakao } from 'src/utils/kakaoGeocode';
+import { UniqueRegionEntity } from 'src/region/unique-region.entity';
 
 @Injectable()
 export class CrawlerService {
   constructor(
     @InjectRepository(DetailDrawEntity)
-    private readonly detailDrawRepository: Repository<DetailDrawEntity>
+    private readonly detailDrawRepository: Repository<DetailDrawEntity>,
+    @InjectRepository(WinningRegionEntity)
+    private readonly winningRegionRepository: Repository<WinningRegionEntity>,
+    @InjectRepository(UniqueRegionEntity)
+    private readonly uniqueRegionRepository: Repository<UniqueRegionEntity>
   ) {}
 
+  async crawlFirstPrize(
+    drawNumber: number
+  ): Promise<WinningRegionEntity[] | null> {
+    const BASE_URL =
+      'https://www.dhlottery.co.kr/store.do?method=topStore&pageGubun=L645';
+    const url = `${BASE_URL}&drwNo=${drawNumber}`;
+    const html = await this.fetchPage(url);
+    const pageData = await this.parseFirstPrizePage(
+      html,
+      drawNumber.toString()
+    );
+
+    if (pageData.length === 0) {
+      return null; // 명확히 반환
+    }
+
+    // 이미 존재하는 uniqueIdentifier들을 한 번에 쿼리
+    const existingIdentifiers = await this.winningRegionRepository.find({
+      where: pageData.map((entry) => ({
+        uniqueIdentifier: this.setUniqueIdentifier(
+          entry.drawNumber,
+          entry.storeName
+        ),
+      })),
+    });
+
+    // 메모리에서 존재 여부 확인
+    const existingSet = new Set(
+      existingIdentifiers.map((e) => e.uniqueIdentifier)
+    );
+
+    const savedRecords: WinningRegionEntity[] = [];
+
+    for (const entry of pageData) {
+      const identifier = this.setUniqueIdentifier(
+        entry.drawNumber,
+        entry.storeName
+      );
+      if (!existingSet.has(identifier)) {
+        const newRecord = this.winningRegionRepository.create(entry);
+        const savedRecord = await this.winningRegionRepository.save(newRecord);
+        savedRecords.push(savedRecord);
+      }
+    }
+
+    return savedRecords.length > 0 ? savedRecords : null;
+  }
+
+  // 회차별 당첨번호 상세 데이터 가져오기
   async fetchDrawData(drawNumber: number): Promise<DetailDrawEntity[]> {
     try {
       const existingData = await this.detailDrawRepository.find({
@@ -76,85 +131,75 @@ export class CrawlerService {
     }
   }
 
-  async crawlStores(province: string): Promise<any[]> {
-    const url = 'https://dhlottery.co.kr/store.do?method=sellerInfo645#';
-
-    const browser = await puppeteer.launch({
-      headless: true,
-    });
-    const page = await browser.newPage();
-    await page.goto(url, { waitUntil: 'networkidle2' });
-
-    page.on('console', (msg) => {
-      for (let i = 0; i < msg.args().length; ++i) {
-        console.log(`${i}: ${msg.args()[i]}`);
-      }
-    });
-    // 지역 이름 클릭 (menu)
-    await page.evaluate((province) => {
-      console.log('province: ', province);
-      const menu = Array.from(
-        document.querySelectorAll('#mainMenuArea a')
-      ).find((el) => el.textContent?.trim() === province);
-      if (menu) {
-        (menu as HTMLElement).click();
-      }
-    }, province);
-    console.log('1');
-
-    // Wait for the table to refresh
-    await page.waitForSelector('#resultTable tbody tr', { timeout: 10000 });
-
-    const scrapeTableData = async () => {
-      return await page.evaluate(() => {
-        const rows = document.querySelectorAll('#resultTable tbody tr');
-        const data = [];
-        rows.forEach((row) => {
-          const cells = row.querySelectorAll('td');
-          data.push({
-            province: cells[0]?.textContent?.trim() || '',
-            city: cells[1]?.textContent?.trim() || '',
-            district: cells[2]?.textContent?.trim() || '',
-            storeName: cells[3]?.textContent?.trim() || '',
-            address: cells[4]?.textContent?.trim() || '',
-            contact: cells[5]?.textContent?.trim() || '',
-          });
-        });
-        return data;
-      });
-    };
-
-    // 모든 페이지 데이터 수집
-    let stores = [];
-    let hasNextPage = true;
-
-    while (hasNextPage) {
-      // 현재 페이지 데이터 크롤링
-      const currentPageData = await scrapeTableData();
-      stores = [...stores, ...currentPageData];
-
-      // 다음 페이지 버튼 클릭
-      hasNextPage = await page.evaluate(() => {
-        const nextPage = document.querySelector('#pagingView .next');
-        if (nextPage && !nextPage.classList.contains('disabled')) {
-          (nextPage as HTMLElement).click();
-          return true;
-        }
-        return false;
-      });
-
-      if (hasNextPage) {
-        // 다음 페이지의 데이터 로드를 대기
-        await page.waitForSelector('#resultTable tbody tr', { timeout: 10000 });
-      }
-    }
-
-    await browser.close();
-    return stores;
-  }
-
   private async fetchPage(url: string): Promise<string> {
     const response = await axios.get(url, { responseType: 'arraybuffer' });
     return iconv.decode(response.data, 'euc-kr');
+  }
+
+  // 1등 배출점 디비에 넣기 위한 데이터로 파싱 후 리턴
+  private async parseFirstPrizePage(
+    html: string,
+    drawNumber: string
+  ): Promise<Partial<WinningRegionEntity>[]> {
+    const $ = cheerio.load(html);
+    const data: Partial<WinningRegionEntity>[] = [];
+
+    const firstPrizeTable = $(
+      '.group_content .group_title:contains("1등 배출점")'
+    ).next('table');
+
+    for (const row of firstPrizeTable.find('tbody tr')) {
+      const name = $(row).find('td:nth-child(2)').text().trim();
+      const method = $(row).find('td:nth-child(3)').text().trim();
+      const address = $(row).find('td:nth-child(4)').text().trim();
+
+      if (name && method && address) {
+        const result = await getCoordinatesAndRegionFromKakao(address);
+
+        if (result) {
+          // Unique region 추가 확인
+          await this.ensureUniqueRegion(
+            result.region.province,
+            result.region.city
+          );
+
+          data.push({
+            drawNumber: parseInt(drawNumber),
+            storeName: name,
+            method,
+            address,
+            province: result.region.province,
+            city: result.region.city,
+            district: result.region.district,
+            coordinates: result.coordinates,
+            uniqueIdentifier: this.setUniqueIdentifier(
+              parseInt(drawNumber),
+              name
+            ),
+          });
+        }
+      }
+    }
+
+    return data;
+  }
+
+  // DB에 없는 완전 새로운 지역에서 당첨 배출점이 나오면 확인 후 save
+  private async ensureUniqueRegion(
+    province: string,
+    city: string
+  ): Promise<void> {
+    const exists = await this.uniqueRegionRepository.findOne({
+      where: { province, city },
+    });
+
+    if (!exists) {
+      const newRegion = this.uniqueRegionRepository.create({ province, city });
+      await this.uniqueRegionRepository.save(newRegion);
+    }
+  }
+
+  private setUniqueIdentifier(drawNumber: number, store: string) {
+    return `${drawNumber}${store}`;
   }
 }

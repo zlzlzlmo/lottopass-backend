@@ -7,7 +7,9 @@ export async function getCoordinatesAndRegionFromKakao(
   region: { province: string; city: string; district: string };
 } | null> {
   const kakaoApiUrl = 'https://dapi.kakao.com/v2/local/search/address.json';
-  const kakaoApiKey = 'ad75ae7d0be70cf49b159db06b601e9a';
+  const kakaoApiKey = process.env.KAKAO_API_KEY;
+
+  console.log('apikey : ', kakaoApiKey);
 
   try {
     const response = await axios.get(kakaoApiUrl, {
@@ -17,6 +19,7 @@ export async function getCoordinatesAndRegionFromKakao(
       params: { query: address },
     });
 
+    console.log('Response : ', response);
     if (response.data.documents.length > 0) {
       const { x, y, address: addressInfo } = response.data.documents[0];
       const region = addressInfo

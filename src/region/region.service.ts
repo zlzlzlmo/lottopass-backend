@@ -21,6 +21,15 @@ export class RegionService {
     private readonly uniqueRegionRepository: Repository<UniqueRegionEntity>
   ) {}
 
+  async findWinningStoresByDrawNumber(drawNumber: number): Promise<boolean> {
+    const res = await this.winningRegionRepository.exists({
+      where: {
+        drawNumber,
+      },
+    });
+    return res;
+  }
+
   async findByLocation(
     province: string,
     city?: string
