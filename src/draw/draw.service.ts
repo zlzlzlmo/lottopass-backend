@@ -13,7 +13,23 @@ export class DrawService {
     @InjectRepository(LottoDrawEntity)
     private readonly lottoRepository: Repository<LottoDrawEntity>
   ) {}
-  async getLatestRound(): Promise<LottoDraw> {
+
+  async fetchOneDraw(drawNumber: number): Promise<LottoDrawEntity> {
+    if (isNaN(Number(drawNumber)))
+      throw new Error('Non proper drawNumber Type');
+    return await this.lottoRepository.findOne({
+      where: {
+        drawNumber,
+      },
+    });
+  }
+
+  async fetchAllDraws(): Promise<LottoDrawEntity[]> {
+    return await this.lottoRepository.find({
+      order: { drawNumber: 'DESC' },
+    });
+  }
+  async fetchLatestDraw(): Promise<LottoDraw> {
     const latestDrawFromDB = await this.lottoRepository.findOne({
       where: {},
       order: { drawNumber: 'DESC' },

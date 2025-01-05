@@ -3,10 +3,10 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { LottoModule } from './lotto/lotto.module'; // LottoModule 추가
 import { ScheduleModule } from '@nestjs/schedule';
 import { RegionModule } from './region/region.module';
 import { DrawModule } from './draw/draw.module';
+import { LocationModule } from './location/location.module';
 
 @Module({
   imports: [
@@ -31,9 +31,9 @@ import { DrawModule } from './draw/draw.module';
       }),
       inject: [ConfigService],
     }),
-    LottoModule,
     RegionModule,
     DrawModule,
+    LocationModule,
   ],
   controllers: [AppController],
   providers: [AppService],
