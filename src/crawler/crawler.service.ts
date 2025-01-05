@@ -8,6 +8,7 @@ import * as iconv from 'iconv-lite';
 import { WinningRegionEntity } from 'src/region/winning-region.entity';
 import { getCoordinatesAndRegionFromKakao } from 'src/utils/kakaoGeocode';
 import { UniqueRegionEntity } from 'src/region/unique-region.entity';
+import { getLocalIp, getPublicIp } from 'src/utils/ip';
 
 @Injectable()
 export class CrawlerService {
@@ -179,9 +180,19 @@ export class CrawlerService {
               ),
             });
           }
-        } catch (error) {
-          console.error(`Failed to fetch coordinates for address: ${address},`);
-          // 오류 발생 시 로그를 남기고 데이터를 스킵
+        } catch (error: any) {
+          // IP 가져오기
+          const localIps = getLocalIp().join(', ');
+          const publicIp = await getPublicIp();
+
+          // 실패 로그 출력
+          console.error(
+            `Failed to fetch coordinates for address: ${address}.`,
+            `Local IPs: ${localIps}`,
+            `Public IP: ${publicIp}`,
+            `Error: ${error.message || error}`
+          );
+          // 오류 발생 시 데이터를 스킵
         }
       }
     }
