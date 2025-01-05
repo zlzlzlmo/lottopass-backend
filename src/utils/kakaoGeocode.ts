@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { getLocalIp, getPublicIp } from './ip';
 
 export async function getCoordinatesAndRegionFromKakao(
   address: string
@@ -42,6 +43,17 @@ export async function getCoordinatesAndRegionFromKakao(
       `Kakao Geocoding failed for address: ${address}`,
       error.message
     );
+
+    const localIps = getLocalIp().join(', ');
+    const publicIp = await getPublicIp();
+
+    console.error(
+      `Failed to fetch coordinates for address: ${address}.`,
+      `Local IPs: ${localIps}`,
+      `Public IP: ${publicIp}`,
+      `Error: ${error.message || error}`
+    );
+    // 오류 발생 시 데이터를 스킵
     return null;
   }
 }
