@@ -154,29 +154,34 @@ export class CrawlerService {
       const address = $(row).find('td:nth-child(4)').text().trim();
 
       if (name && method && address) {
-        const result = await getCoordinatesAndRegionFromKakao(address);
+        try {
+          const result = await getCoordinatesAndRegionFromKakao(address);
 
-        if (result) {
-          // Unique region 추가 확인
-          await this.ensureUniqueRegion(
-            result.region.province,
-            result.region.city
-          );
+          if (result) {
+            // Unique region 추가 확인
+            await this.ensureUniqueRegion(
+              result.region.province,
+              result.region.city
+            );
 
-          data.push({
-            drawNumber: parseInt(drawNumber),
-            storeName: name,
-            method,
-            address,
-            province: result.region.province,
-            city: result.region.city,
-            district: result.region.district,
-            coordinates: result.coordinates,
-            uniqueIdentifier: this.setUniqueIdentifier(
-              parseInt(drawNumber),
-              name
-            ),
-          });
+            data.push({
+              drawNumber: parseInt(drawNumber),
+              storeName: name,
+              method,
+              address,
+              province: result.region.province,
+              city: result.region.city,
+              district: result.region.district,
+              coordinates: result.coordinates,
+              uniqueIdentifier: this.setUniqueIdentifier(
+                parseInt(drawNumber),
+                name
+              ),
+            });
+          }
+        } catch (error) {
+          console.error(`Failed to fetch coordinates for address: ${address},`);
+          // 오류 발생 시 로그를 남기고 데이터를 스킵
         }
       }
     }
