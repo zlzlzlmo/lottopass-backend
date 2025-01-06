@@ -74,7 +74,6 @@ export class RegionService {
     province: string,
     city?: string
   ): Promise<StoreRegionEntity[]> {
-    await this.storeRegionEntity.clear();
     const existingStores = await this.storeRegionEntity.find({
       where: { province, city },
     });
