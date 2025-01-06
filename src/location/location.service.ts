@@ -4,7 +4,7 @@ import axios from 'axios';
 @Injectable()
 export class LocationService {
   private kakaoApiUrl =
-    'https://dapi.kakao.com/v2/local/geo/coord2regioncode.json';
+    'https://dapi.kakao.com/v2/local/geo/coord2address.json';
   private kakaoApiKey = process.env.KAKAO_API_KEY;
 
   async fetchAddressFromCoordinates(
@@ -30,7 +30,7 @@ export class LocationService {
       }
 
       // 첫 번째 결과의 주소 반환
-      const address = response.data.documents[0].address_name;
+      const address = response.data.documents[0].address.address_name;
       return address;
     } catch (error) {
       // AxiosError로 에러 타입 좁히기

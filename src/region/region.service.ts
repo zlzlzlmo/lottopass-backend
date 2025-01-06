@@ -54,7 +54,19 @@ export class RegionService {
   }
 
   async getAllRegions(): Promise<UniqueRegionEntity[]> {
-    return await this.uniqueRegionRepository.find();
+    const regions = await this.uniqueRegionRepository
+      .createQueryBuilder('region')
+      .select([
+        'region.id As id',
+        'SUBSTRING(region.province, 1, 2) AS province', // province의 첫 두 글자만 가져옴
+        'region.city As city',
+      ])
+      .getRawMany();
+
+    return regions.map((region) => ({
+      ...region,
+      province: region.province, // 매핑된 province 사용
+    })) as UniqueRegionEntity[];
   }
 
   async fetchAllStores(province: string, city?: string): Promise<StoreInfo[]> {
@@ -67,7 +79,7 @@ export class RegionService {
       while (true) {
         const formData = new URLSearchParams();
         formData.append('searchType', '1');
-        formData.append('sltSIDO', province);
+        formData.append('sltSIDO', province.substring(0, 2));
         formData.append('sltGUGUN', city ?? '');
         formData.append('nowPage', currentPage.toString());
 
