@@ -7,6 +7,7 @@ import { FindAllResponse } from 'lottopass-shared';
 export class LocationController {
   constructor(private readonly locationService: LocationService) {}
 
+  // 내 위치 가져오기
   @Get('current')
   async getCurrentLocation(
     @Query() coordinates: CoordinatesDto

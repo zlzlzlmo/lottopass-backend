@@ -1,187 +1,248 @@
-# LottoPass Backend
+# LottoPass
 
-> **로또 번호 데이터를 안전하게 관리하고 제공하는 백엔드 애플리케이션**
+> **로또 번호 통계와 당첨점 정보를 제공하는 통합 플랫폼**
 
-LottoPass의 백엔드는 로또 번호 데이터의 수집, 저장, 관리, 및 API 제공 역할을 수행합니다. 이 레포지토리는 LottoPass의 백엔드 애플리케이션을 위한 코드베이스를 포함합니다.
-
----
-
-## 📌 **주요 기능**
-
-- **로또 번호 API 제공**: 과거 로또 당첨 데이터를 조회할 수 있는 API 제공.
-- **최신 회차 데이터 업데이트**: 매주 최신 당첨 데이터를 자동으로 저장.
-- **안정적인 데이터 관리**: TypeORM과 MySQL을 활용한 데이터 관리.
-- **스케줄링**: 최신 데이터를 정기적으로 업데이트하는 크론 작업.
+LottoPass는 로또 당첨 번호의 통계와 데이터를 분석하고, 주변 로또 판매점과 당첨점을 확인할 수 있는 웹 애플리케이션입니다.  
+로또를 즐기는 사용자들이 데이터를 기반으로 더 재미있고 편리하게 로또를 경험할 수 있도록 돕습니다.
 
 ---
 
-## 🛠 **기술 스택**
+## 📖 프로젝트 개요
 
-- **NestJS**: 백엔드 애플리케이션 프레임워크.
-- **TypeScript**: 타입 안전성을 보장하는 JavaScript 확장.
-- **TypeORM**: 데이터베이스 ORM.
-- **MySQL**: 데이터베이스.
-- **Axios**: 외부 API 호출.
-- **Schedule Module**: 크론 작업 스케줄링.
+- **로또 번호 통계**: 특정 회차 범위에서 번호별 출현 횟수와 패턴을 분석
+- **주변 판매점 조회**: 사용자 위치 기반으로 근처 로또 판매점 및 당첨점 정보 확인
+- **회차별 상세 보기**: 각 회차의 1등부터 5등까지 당첨자 수 및 총 당첨금 확인
+- **최신 정보 크롤링**: 최신 회차의 당첨 정보를 업데이트
 
 ---
 
-## 📂 **프로젝트 구조**
+## 🚀 주요 기능
 
+### 1. 로또 번호 통계
+
+- 번호별 출현 횟수 통계 제공
+- 꺾은선 그래프 및 공 형태 시각화를 통해 직관적인 데이터 분석
+- 회차 범위를 설정하여 특정 기간의 데이터를 필터링
+
+### 2. 주변 판매점 조회
+
+- **Geolocation API**를 활용해 사용자 위치 기반의 판매점 정보 제공
+- 로또 판매점 및 당첨점의 위치와 거리 표시
+- **Kakao API**를 통해 위도/경도를 주소로 변환
+
+### 3. 회차별 상세 보기
+
+- 당첨 번호와 보너스 번호 확인
+- 각 등수(1등~5등) 당첨자 수와 당첨금액 세부 정보 제공
+- 최신 회차의 당첨 매장 정보를 크롤링하여 실시간 업데이트
+
+### 4. 반응형 UI
+
+- 데스크탑과 모바일 환경 모두에 최적화된 사용자 경험 제공
+
+---
+
+## 🛠️ 기술 스택
+
+### 프론트엔드
+
+- **React**: 컴포넌트 기반 UI 라이브러리
+- **TypeScript**: 안정성을 보장하는 정적 타입 시스템
+- **Ant Design**: UI 구성 및 스타일링
+- **Chart.js**: 데이터 시각화를 위한 차트 라이브러리
+- **Geolocation API**: 사용자 위치 정보 활용
+
+### 백엔드
+
+- **Nest.js**: 백엔드 애플리케이션 프레임워크
+- **TypeORM**: 데이터베이스 ORM
+- **MySQL**: 데이터 저장소
+- **Axios**: HTTP 요청을 처리하기 위한 클라이언트
+- **Kakao API**: 위도/경도를 주소로 변환하기 위한 외부 API
+
+---
+
+## 📦 설치 및 실행 방법
+
+### 1. 클론
+
+```bash
+git clone https://github.com/zlzlzlmo/lottopass-frontend.git
+cd lottopass-frontend
 ```
-lottopass-backend/
-├── src/
-│   ├── filters/                # HTTP 예외 필터
-│   ├── lotto/                  # 로또 데이터 관련 모듈
-│   │   ├── lotto-draw.entity.ts  # 로또 데이터 엔티티 정의
-│   │   ├── lotto.controller.ts   # API 엔드포인트 컨트롤러
-│   │   ├── lotto.service.ts      # 비즈니스 로직 서비스
-│   │   └── lotto.module.ts       # 모듈 정의
-│   ├── utils/                  # 유틸리티 함수
-│   ├── app.controller.ts       # 기본 앱 컨트롤러
-│   ├── app.service.ts          # 기본 앱 서비스
-│   ├── app.module.ts           # 애플리케이션 루트 모듈
-│   └── main.ts                 # 애플리케이션 엔트리포인트
-├── test/                       # 테스트 코드
-├── .env                        # 환경 변수 파일
-└── Dockerfile                  # Docker 설정
-```
-
----
-
-## 🧑‍💻 **설치 및 실행**
-
-### 1. 레포지토리 클론
 
 ```bash
 git clone https://github.com/zlzlzlmo/lottopass-backend.git
 cd lottopass-backend
 ```
 
-### 2. 의존성 설치
+### 2. 환경 변수 설정
+
+- `.env` 파일을 프로젝트 루트에 생성하고 아래 내용을 추가합니다:
+
+```plaintext
+KAKAO_API_KEY=YOUR_KAKAO_API_KEY
+```
+
+### 3. 의존성 설치
 
 ```bash
 npm install
 ```
 
-### 3. 환경 변수 설정
-
-`.env.example` 파일을 참고하여 `.env` 파일을 생성하고 필요한 값을 입력하세요.
-
-### 4. 데이터베이스 설정
-
-- MySQL 데이터베이스를 생성합니다.
-- `.env` 파일에 데이터베이스 설정값을 입력합니다.
-  ```env
-  MYSQLHOST=localhost
-  MYSQLPORT=3306
-  MYSQLUSER=root
-  MYSQLPASSWORD=password
-  MYSQLDATABASE=lottopass
-  ```
-
-### 5. 서버 실행
-
-#### 개발 서버 실행
+### 4. 개발 서버 실행
 
 ```bash
-npm run start:dev
+npm run dev(front)
+npm run start:dev(backend)
 ```
 
-#### 프로덕션 빌드 및 실행
+### 5. 빌드 (배포용)
 
 ```bash
 npm run build
-npm run start:prod
 ```
 
 ---
 
-## 📡 **API 명세**
+## 📂 프로젝트 구조
 
-### 1. 전체 로또 추첨 데이터 가져오기
+### 프론트엔드 구조
 
-- **URL**: `/api/lotto/all`
-- **Method**: `GET`
-- **Response**:
-  ```json
-  {
-    "status": "success",
-    "data": [
-      {
-        "drawNumber": 1,
-        "date": "2023-01-01",
-        "winningNumbers": [1, 2, 3, 4, 5, 6],
-        "bonusNumber": 7,
-        "prizeStatistics": {
-          "totalPrize": 1000000000,
-          "firstWinAmount": 200000000,
-          "firstAccumAmount": 600000000,
-          "firstPrizeWinnerCount": 3
-        }
-      }
-    ]
-  }
-  ```
+```plaintext
+src/
+├── api/                # API 관련 로직 (axios 인스턴스 및 서비스 클래스)
+│   ├── baseAPI.ts      # 공통 API 서비스 클래스
+│   ├── DrawService.ts  # Draw API 서비스
+│   ├── drawService.ts  # DrawService 인스턴스 생성
+│   └── index.ts        # 모든 API 서비스의 엔트리포인트
+├── components/         # 재사용 가능한 컴포넌트들
+│   ├── Button/
+│   │   ├── Button.tsx
+│   │   ├── Button.test.tsx
+│   │   └── Button.styles.ts
+│   ├── Header/
+│   │   ├── Header.tsx
+│   │   ├── Header.test.tsx
+│   │   └── Header.styles.ts
+│   └── index.ts        # 컴포넌트 엔트리포인트
+├── features/           # 상태 관리 및 페이지별 관련 로직
+│   ├── draw/
+│   │   ├── hooks.ts
+│   │   ├── drawSlice.ts
+│   │   ├── types.ts
+│   │   ├── utils.ts
+│   │   ├── components/ # Draw 관련 컴포넌트
+│   │   │   ├── DrawCard.tsx
+│   │   │   ├── DrawCard.styles.ts
+│   │   │   └── index.ts
+│   │   └── index.ts    # Draw 모듈 엔트리포인트
+│   └── index.ts        # 모든 feature 엔트리포인트
+├── hooks/              # 전역적으로 재사용 가능한 커스텀 훅
+│   ├── useInterceptions.ts
+│   └── index.ts
+├── pages/              # 페이지 컴포넌트
+│   ├── HomePage.tsx
+├── redux/              # 상태 관리 설정 (Redux)
+│   ├── store.ts        # Redux store 설정
+├── styles/             # 전역 스타일 관리 (CSS-in-JS, SCSS, Tailwind 등)
+│   ├── globals.css     # 전역 스타일
+│   └── _variables.ts
+├── utils/              # 공통 유틸리티 함수
+│   ├── distance.ts
+├── App.tsx             # 애플리케이션 루트 컴포넌트
+├── index.tsx           # ReactDOM 렌더링 진입점
+└── react-app-env.d.ts  # TypeScript 환경 설정
+```
 
-### 2. 특정 회차 로또 데이터 가져오기
+### 백엔드 구조
 
-- **URL**: `/api/lotto/draw/:drawNumber`
-- **Method**: `GET`
-- **Response**:
-  ```json
-  {
-    "status": "success",
-    "data": {
-      "drawNumber": 123,
-      "date": "2022-03-01",
-      "winningNumbers": [5, 8, 13, 22, 29, 33],
-      "bonusNumber": 10,
-      "prizeStatistics": {
-        "totalPrize": 800000000,
-        "firstWinAmount": 160000000,
-        "firstAccumAmount": 480000000,
-        "firstPrizeWinnerCount": 3
-      }
-    }
-  }
-  ```
-
-### 3. 최신 로또 데이터 가져오기
-
-- **URL**: `/api/lotto/latest`
-- **Method**: `GET`
-- **Response**:
-  ```json
-  {
-    "status": "success",
-    "data": {
-      "drawNumber": 1000,
-      "date": "2023-12-31",
-      "winningNumbers": [10, 20, 30, 40, 41, 42],
-      "bonusNumber": 43,
-      "prizeStatistics": {
-        "totalPrize": 1500000000,
-        "firstWinAmount": 300000000,
-        "firstAccumAmount": 900000000,
-        "firstPrizeWinnerCount": 5
-      }
-    }
-  }
-  ```
+```plaintext
+src/
+├── api/                # API 관련 로직 (axios 인스턴스 및 서비스 클래스)
+├── components/         # 재사용 가능한 컴포넌트들
+├── features/           # 상태 관리 및 페이지별 관련 로직
+├── hooks/              # 재사용 가능한 커스텀 훅
+├── pages/              # 페이지 컴포넌트
+├── redux/              # 상태 관리 설정 (Redux)
+├── styles/             # 전역 스타일 관리
+├── utils/              # 공통 유틸리티 함수
+├── region/             # 지역 및 판매점 관련 모듈
+│   ├── region.controller.ts
+│   ├── region.service.ts
+│   ├── unique-region.entity.ts
+│   ├── winning-region.entity.ts
+├── draw/               # 로또 회차 관련 모듈
+│   ├── draw.controller.ts
+│   ├── draw.service.ts
+│   ├── lotto-draw.entity.ts
+│   ├── detail-draw.entity.ts
+├── crawler/            # 크롤링 모듈
+│   ├── crawler.service.ts
+│   ├── detail-draw.entity.ts
+├── App.tsx             # 애플리케이션 루트 컴포넌트
+├── index.tsx           # ReactDOM 렌더링 진입점
+└── react-app-env.d.ts  # TypeScript 환경 설정
+```
 
 ---
 
-## ✨ **향후 업데이트**
+## 📊 API 명세
 
-- **당첨 지역 데이터 크롤링 및 API 제공**
-- **데이터 통계 대시보드 API**
-- **유저 인증 및 관리**
+### 1. Region API
+
+| Method | Endpoint                      | Description                    |
+| ------ | ----------------------------- | ------------------------------ |
+| GET    | `/region/unique/all`          | 모든 지역 목록 가져오기        |
+| GET    | `/region/stores/winning`      | 특정 지역의 1등 배출 매장 조회 |
+| GET    | `/region/winning/:drawNumber` | 특정 회차의 1등 배출 매장 조회 |
+| GET    | `/region/all-stores`          | 특정 지역의 모든 판매점 조회   |
+
+### 2. Draw API
+
+| Method | Endpoint                   | Description                         |
+| ------ | -------------------------- | ----------------------------------- |
+| GET    | `/draw`                    | 기본 엔드포인트 테스트              |
+| GET    | `/draw/latest`             | 최신 회차 정보 가져오기             |
+| GET    | `/draw/all`                | 모든 회차 정보 가져오기             |
+| GET    | `/draw/:drawNumber`        | 특정 회차 정보 가져오기             |
+| GET    | `/draw/detail/:drawNumber` | 특정 회차의 세부 당첨 정보 가져오기 |
+
+### 3. Location API
+
+| Method | Endpoint    | Description                         |
+| ------ | ----------- | ----------------------------------- |
+| GET    | (내부 호출) | 위도/경도를 주소로 변환 (Kakao API) |
 
 ---
 
-## 📬 **문의**
+## 📊 스크린샷
 
-프로젝트와 관련된 문의 사항은 다음 이메일로 연락주세요:
+<div style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center;">
+  <div style="text-align: center; width: 150px;">
+    <img src="./images/home.png" alt="홈 화면" width="150"/>
+    <p>홈 화면</p>
+  </div>
+  <div style="text-align: center; width: 150px;">
+    <img src="./images/satistic.png" alt="로또 통계 화면" width="150"/>
+    <p>로또 통계 화면</p>
+  </div>
+  <div style="text-align: center; width: 150px;">
+    <img src="./images/stores.png" alt="판매점 조회 화면" width="150"/>
+    <p>판매점 조회 화면</p>
+  </div>
+  <div style="text-align: center; width: 150px;">
+    <img src="./images/detail.png" alt="회차별 상세 화면" width="150"/>
+    <p>회차별 상세 화면</p>
+  </div>
+  <div style="text-align: center; width: 150px;">
+    <img src="./images/generation.png" alt="번호 생성 화면" width="150"/>
+    <p>번호 생성 화면</p>
+  </div>
+</div>
 
-- Email: [zlzlzlmo60@gmail.com](mailto:zlzlzlmo60@gmail.com)
+---
+
+## 📧 문의
+
+- **Email**: zlzlzlmo60@gmail.com
