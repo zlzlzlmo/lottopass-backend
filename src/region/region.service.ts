@@ -89,7 +89,7 @@ export class RegionService {
               `${store.BPLCLOCPLC1} ${store.BPLCLOCPLC2} ${store.BPLCLOCPLC3} ${store.BPLCLOCPLCDTLADRES}`;
 
             return {
-              fullAddress: fullAddress.trim(),
+              fullAddress: decodeCustom(fullAddress.trim()),
               latitude: store.LATITUDE,
               longitude: store.LONGITUDE,
               storeName: decodeCustom(store.FIRMNM),
