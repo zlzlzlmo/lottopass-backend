@@ -159,13 +159,6 @@ src/
 
 ```plaintext
 src/
-├── api/                # API 관련 로직 (axios 인스턴스 및 서비스 클래스)
-├── components/         # 재사용 가능한 컴포넌트들
-├── features/           # 상태 관리 및 페이지별 관련 로직
-├── hooks/              # 재사용 가능한 커스텀 훅
-├── pages/              # 페이지 컴포넌트
-├── redux/              # 상태 관리 설정 (Redux)
-├── styles/             # 전역 스타일 관리
 ├── utils/              # 공통 유틸리티 함수
 ├── region/             # 지역 및 판매점 관련 모듈
 │   ├── region.controller.ts
@@ -180,9 +173,9 @@ src/
 ├── crawler/            # 크롤링 모듈
 │   ├── crawler.service.ts
 │   ├── detail-draw.entity.ts
-├── App.tsx             # 애플리케이션 루트 컴포넌트
-├── index.tsx           # ReactDOM 렌더링 진입점
-└── react-app-env.d.ts  # TypeScript 환경 설정
+├── location/            # 위치 모듈
+│   ├── location.controller.ts
+│   ├── location.service.ts
 ```
 
 ---
