@@ -218,28 +218,13 @@ src/
 
 ## 📊 스크린샷
 
-<div style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center;">
-  <div style="text-align: center; width: 150px;">
-    <img src="./images/home.png" alt="홈 화면" width="150"/>
-    <p>홈 화면</p>
-  </div>
-  <div style="text-align: center; width: 150px;">
-    <img src="./images/satistic.png" alt="로또 통계 화면" width="150"/>
-    <p>로또 통계 화면</p>
-  </div>
-  <div style="text-align: center; width: 150px;">
-    <img src="./images/stores.png" alt="판매점 조회 화면" width="150"/>
-    <p>판매점 조회 화면</p>
-  </div>
-  <div style="text-align: center; width: 150px;">
-    <img src="./images/detail.png" alt="회차별 상세 화면" width="150"/>
-    <p>회차별 상세 화면</p>
-  </div>
-  <div style="text-align: center; width: 150px;">
-    <img src="./images/generation.png" alt="번호 생성 화면" width="150"/>
-    <p>번호 생성 화면</p>
-  </div>
-</div>
+| ![홈 화면](./images/home.png) | ![로또 통계 화면](./images/satistic.png) | ![판매점 조회 화면](./images/stores.png) |
+| ----------------------------- | ---------------------------------------- | ---------------------------------------- |
+| 홈 화면                       | 로또 통계 화면                           | 판매점 조회 화면                         |
+
+| ![회차별 상세 화면](./images/detail.png) | ![번호 생성 화면](./images/generation.png) |
+| ---------------------------------------- | ------------------------------------------ |
+| 회차별 상세 화면                         | 번호 생성 화면                             |
 
 ---
 
