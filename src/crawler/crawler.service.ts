@@ -58,7 +58,7 @@ export class CrawlerService {
               const fullAddress =
                 store.BPLCDORODTLADRES ||
                 `${store.BPLCLOCPLC1} ${store.BPLCLOCPLC2} ${store.BPLCLOCPLC3} ${store.BPLCLOCPLCDTLADRES}`;
-              console.log('fullAddress ; ', fullAddress);
+
               return {
                 province,
                 city: city || '',

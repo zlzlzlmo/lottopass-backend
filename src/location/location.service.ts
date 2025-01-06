@@ -1,8 +1,10 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import axios from 'axios';
 
 @Injectable()
 export class LocationService {
+  private readonly logger = new Logger(LocationService.name);
+
   private kakaoApiUrl =
     'https://dapi.kakao.com/v2/local/geo/coord2address.json';
   private kakaoApiKey = process.env.KAKAO_API_KEY;
@@ -32,7 +34,8 @@ export class LocationService {
       // 첫 번째 결과의 주소 반환
       const address = response.data.documents[0].address.address_name;
       return address;
-    } catch (error) {
+    } catch (error: any) {
+      this.logger.error('KaKa API Error : ', error.response?.data?.message);
       // AxiosError로 에러 타입 좁히기
       if (axios.isAxiosError(error)) {
         throw new HttpException(

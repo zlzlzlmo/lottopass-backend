@@ -10,8 +10,6 @@ export async function getCoordinatesAndRegionFromKakao(
   const kakaoApiUrl = 'https://dapi.kakao.com/v2/local/search/address.json';
   const kakaoApiKey = process.env.KAKAO_API_KEY;
 
-  console.log('apikey : ', kakaoApiKey);
-
   try {
     const response = await axios.get(kakaoApiUrl, {
       headers: {
@@ -20,7 +18,6 @@ export async function getCoordinatesAndRegionFromKakao(
       params: { query: address },
     });
 
-    console.log('Response : ', response);
     if (response.data.documents.length > 0) {
       const { x, y, address: addressInfo } = response.data.documents[0];
       const region = addressInfo
