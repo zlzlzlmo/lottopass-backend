@@ -106,10 +106,10 @@ export class RegionService {
     }
   }
 
-  @Cron('0 0 * * 1#1,3') // 매월 첫 번째와 세 번째 월요일
-  async clearStoreData() {
-    this.logger.log('Clearing store data...');
-    await this.storeRegionEntity.clear();
-    this.logger.log('Store data cleared successfully');
-  }
+  // @Cron('0 0 * * 1#1,3') // 매월 첫 번째와 세 번째 월요일
+  // async clearStoreData() {
+  //   this.logger.log('Clearing store data...');
+  //   await this.storeRegionEntity.clear();
+  //   this.logger.log('Store data cleared successfully');
+  // }
 }
