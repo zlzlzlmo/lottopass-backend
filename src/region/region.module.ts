@@ -11,6 +11,7 @@ import { DetailDrawEntity } from 'src/crawler/detail-draw.entity';
 import { LottoDrawEntity } from 'src/draw/lotto-draw.entity';
 import { DrawModule } from 'src/draw/draw.module';
 import { DrawService } from 'src/draw/draw.service';
+import { StoreRegionEntity } from './store-region.entity';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { DrawService } from 'src/draw/draw.service';
       WinningRegionEntity,
       LottoDrawEntity,
       DetailDrawEntity,
+      StoreRegionEntity,
     ]),
     HttpModule,
     DrawModule,

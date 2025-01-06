@@ -9,6 +9,9 @@ import { WinningRegionEntity } from 'src/region/winning-region.entity';
 import { getCoordinatesAndRegionFromKakao } from 'src/utils/kakaoGeocode';
 import { UniqueRegionEntity } from 'src/region/unique-region.entity';
 import { getLocalIp, getPublicIp } from 'src/utils/ip';
+import { StoreInfo } from 'lottopass-shared';
+import { StoreRegionEntity } from 'src/region/store-region.entity';
+import { decodeCustom } from 'src/utils/decode';
 
 @Injectable()
 export class CrawlerService {
@@ -20,6 +23,70 @@ export class CrawlerService {
     @InjectRepository(UniqueRegionEntity)
     private readonly uniqueRegionRepository: Repository<UniqueRegionEntity>
   ) {}
+
+  // 로또 지역별 판매점 크롤링
+  async crawlLottoStores(
+    province: string,
+    city?: string
+  ): Promise<({ province: string; city: string } & StoreInfo)[]> {
+    let currentPage = 1;
+    const allResults: ({ province: string; city: string } & StoreInfo)[] = [];
+    const BASE_URL =
+      'https://dhlottery.co.kr/store.do?method=sellerInfo645Result';
+
+    try {
+      while (true) {
+        const formData = new URLSearchParams();
+        formData.append('searchType', '1');
+        formData.append('sltSIDO', province.substring(0, 2));
+        formData.append('sltGUGUN', city ?? '');
+        formData.append('nowPage', currentPage.toString());
+
+        const response = await axios.post(BASE_URL, formData.toString(), {
+          responseType: 'arraybuffer',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+          },
+        });
+
+        const decodedData = iconv.decode(Buffer.from(response.data), 'EUC-KR');
+        const result = JSON.parse(decodedData);
+        if (result.totalPage === 0) return [] as any;
+        if (result.arr && result.arr.length > 0) {
+          try {
+            const processedData = result.arr.map((store: any) => {
+              const fullAddress =
+                store.BPLCDORODTLADRES ||
+                `${store.BPLCLOCPLC1} ${store.BPLCLOCPLC2} ${store.BPLCLOCPLC3} ${store.BPLCLOCPLCDTLADRES}`;
+              console.log('fullAddress ; ', fullAddress);
+              return {
+                province,
+                city: city || '',
+                fullAddress: decodeCustom(fullAddress.trim()),
+                latitude: store.LATITUDE,
+                longitude: store.LONGITUDE,
+                storeName: decodeCustom(store.FIRMNM),
+                phone: store.RTLRSTRTELNO || null,
+              };
+            });
+
+            allResults.push(...processedData);
+          } catch (error) {
+            console.error('Error in map function:', error);
+          }
+        } else {
+          console.log('result.arr is missing or empty.');
+        }
+
+        if (result.nowPage === result.pageEnd) break;
+        currentPage += 1;
+      }
+    } catch (error) {
+      throw new Error('Failed to fetch lotto store data');
+    }
+
+    return allResults;
+  }
 
   async crawlFirstPrize(
     drawNumber: number

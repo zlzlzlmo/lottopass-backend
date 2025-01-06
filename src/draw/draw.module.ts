@@ -8,6 +8,7 @@ import { CrawlerService } from 'src/crawler/crawler.service';
 import { WinningRegionEntity } from 'src/region/winning-region.entity';
 import { UniqueRegionEntity } from 'src/region/unique-region.entity';
 import { DetailDrawEntity } from 'src/crawler/detail-draw.entity';
+import { StoreRegionEntity } from 'src/region/store-region.entity';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { DetailDrawEntity } from 'src/crawler/detail-draw.entity';
       WinningRegionEntity,
       UniqueRegionEntity,
       DetailDrawEntity,
+      StoreRegionEntity,
     ]),
   ],
   controllers: [DrawController],
