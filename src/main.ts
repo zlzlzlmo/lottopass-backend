@@ -13,6 +13,8 @@ async function bootstrap() {
       'https://www.lottopass.co.kr',
       'http://localhost:4173',
       'capacitor://localhost',
+      'https://localhost/',
+      'https://localhost',
     ],
     methods: 'GET,POST,PUT,DELETE',
     credentials: true,
