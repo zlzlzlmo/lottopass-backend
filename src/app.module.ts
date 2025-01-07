@@ -7,6 +7,8 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { RegionModule } from './region/region.module';
 import { DrawModule } from './draw/draw.module';
 import { LocationModule } from './location/location.module';
+import { AuthModule } from './auth/auth.module';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -34,6 +36,8 @@ import { LocationModule } from './location/location.module';
     RegionModule,
     DrawModule,
     LocationModule,
+    AuthModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],

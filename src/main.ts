@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './filters/http-exception.filter';
 import { ValidationPipe } from '@nestjs/common';
+import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -29,9 +30,10 @@ async function bootstrap() {
       transform: true,
     })
   );
-
+  app.use(cookieParser());
   // 포트 설정
   const PORT = process.env.PORT || 3000;
+
   await app.listen(PORT);
 
   console.log(`Server is running on: http://localhost:${PORT}`);
