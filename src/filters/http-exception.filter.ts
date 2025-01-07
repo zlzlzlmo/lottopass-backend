@@ -21,9 +21,16 @@ export class HttpExceptionFilter implements ExceptionFilter {
         ? exception.getResponse()
         : 'Internal server error';
 
+    const errorMessage =
+      typeof message === 'string'
+        ? message
+        : (message as any)?.message || 'Unknown error';
+
     response.status(status).json({
       status: 'error',
-      message,
+      message: errorMessage,
+      timestamp: new Date().toISOString(),
+      path: ctx.getRequest().url,
     });
   }
 }
