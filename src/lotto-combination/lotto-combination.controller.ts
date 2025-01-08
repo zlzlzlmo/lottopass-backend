@@ -23,7 +23,7 @@ export class LottoCombinationController {
   @Post('save')
   async saveCombinations(
     @Req() req: Request,
-    @Body('combinations') combinations: number[][]
+    @Body('combinations') combinations: number[]
   ) {
     const user = req.user as UserEntity;
     return this.lottoCombinationService.saveCombinations(user, combinations);

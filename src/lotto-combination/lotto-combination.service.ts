@@ -12,8 +12,8 @@ export class LottoCombinationService {
 
   async saveCombinations(
     user: UserEntity,
-    combinations: number[][]
-  ): Promise<LottoCombinationEntity[]> {
+    combinations: number[]
+  ): Promise<LottoCombinationEntity> {
     return this.lottoCombinationRepository.saveCombinations(user, combinations);
   }
 

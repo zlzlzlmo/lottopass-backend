@@ -3,28 +3,42 @@ import { Injectable } from '@nestjs/common';
 import { Repository, DataSource } from 'typeorm';
 import { UserEntity } from 'src/user/user.entity';
 import { LottoCombinationEntity } from './lotto-combination.entity';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class LottoCombinationRepository {
   private repository: Repository<LottoCombinationEntity>;
 
-  constructor(private readonly dataSource: DataSource) {
+  constructor(
+    private readonly dataSource: DataSource,
+    @InjectRepository(UserEntity)
+    private readonly userRepository: Repository<UserEntity>
+  ) {
     this.repository = this.dataSource.getRepository(LottoCombinationEntity);
   }
 
   async saveCombinations(
     user: UserEntity,
-    combinations: number[][]
-  ): Promise<LottoCombinationEntity[]> {
-    const savedCombinations = [];
-    for (const combination of combinations) {
-      const lottoCombination = this.repository.create({
-        user,
-        combination,
-      });
-      savedCombinations.push(await this.repository.save(lottoCombination));
+    combination: number[]
+  ): Promise<LottoCombinationEntity> {
+    const existingUser = await this.userRepository.findOne({
+      where: { email: user.email },
+    });
+
+    if (!existingUser) {
+      throw new Error('User does not exist in the database.');
     }
-    return savedCombinations;
+
+    const lottoCombination = this.repository.create({
+      user: { id: existingUser.id },
+      combination,
+    });
+
+    try {
+      return await this.repository.save(lottoCombination);
+    } catch (error) {
+      throw error;
+    }
   }
 
   async findByUser(userId: string): Promise<LottoCombinationEntity[]> {
