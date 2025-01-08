@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserEntitiy } from 'src/user/user.entity';
+import { UserEntity } from 'src/user/user.entity';
 import { Repository } from 'typeorm';
 import { GoogleUser } from './auth.controller';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(UserEntitiy)
-    private readonly userRepository: Repository<UserEntitiy>
+    @InjectRepository(UserEntity)
+    private readonly userRepository: Repository<UserEntity>
   ) {}
   async handleGoogleLogin(googleUserData: GoogleUser) {
     const { email, name, picture } = googleUserData;

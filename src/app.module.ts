@@ -9,6 +9,9 @@ import { DrawModule } from './draw/draw.module';
 import { LocationModule } from './location/location.module';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
+import { LottoCombinationModule } from './lotto-combination/lotto-combination.module';
+import { UserEntity } from './user/user.entity';
+import { LottoCombinationEntity } from './lotto-combination/lotto-combination.entity';
 
 @Module({
   imports: [
@@ -23,13 +26,13 @@ import { UserModule } from './user/user.module';
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         type: 'mysql',
-        host: configService.get<string>('MYSQLHOST'), // Railway 환경 변수
+        host: configService.get<string>('MYSQLHOST'),
         port: configService.get<number>('MYSQLPORT', 3306),
         username: configService.get<string>('MYSQLUSER'),
         password: configService.get<string>('MYSQLPASSWORD'),
         database: configService.get<string>('MYSQLDATABASE'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: configService.get<boolean>('DB_SYNCHRONIZE', true), // 프로덕션에서는 false 권장
+        synchronize: configService.get<boolean>('DB_SYNCHRONIZE', true),
       }),
       inject: [ConfigService],
     }),
@@ -38,6 +41,7 @@ import { UserModule } from './user/user.module';
     LocationModule,
     AuthModule,
     UserModule,
+    LottoCombinationModule,
   ],
   controllers: [AppController],
   providers: [AppService],

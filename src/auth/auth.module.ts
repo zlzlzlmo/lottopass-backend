@@ -6,11 +6,11 @@ import { GoogleStrategy } from './strategies/google.strategy';
 import { JwtService } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserService } from 'src/user/user.service';
-import { UserEntitiy } from 'src/user/user.entity';
+import { UserEntity } from 'src/user/user.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([UserEntitiy]),
+    TypeOrmModule.forFeature([UserEntity]),
     PassportModule.register({ defaultStrategy: 'google' }),
   ],
   controllers: [AuthController],
