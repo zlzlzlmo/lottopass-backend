@@ -12,12 +12,20 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Request, Response } from 'express';
 import { FindAllResponse, UserProfile } from 'lottopass-shared';
+import { AuthService } from './auth.service';
+
+export interface GoogleUser {
+  email: string;
+  name: string;
+  picture: string;
+}
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly jwtService: JwtService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    private readonly authService: AuthService
   ) {}
 
   @Get('me')
@@ -74,39 +82,40 @@ export class AuthController {
   @UseGuards(AuthGuard('google'))
   async googleAuth() {
     // 구글인증 시작
+    console.log('1');
   }
 
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
   async googleAuthRedirect(@Req() req: Request, @Res() res: Response) {
-    interface GoogleUser {
-      id: string;
-      email: string;
-      name: string;
-      picture: string;
+    const googleUser = req.user as GoogleUser;
+
+    try {
+      const user = await this.authService.handleGoogleLogin(googleUser);
+      // console.log('user db 완료');
+      const token = this.jwtService.sign(
+        {
+          email: user.email,
+          name: user.name,
+          picture: user.picture,
+        },
+        {
+          secret: this.configService.get<string>('JWT_SECRET'),
+          expiresIn: '1h',
+        }
+      );
+
+      res.cookie('jwt', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 3600 * 1000, // 1시간
+        sameSite: 'strict',
+      });
+
+      res.redirect(`${this.configService.get<string>('FRONTEND_BASE_URL')}/`);
+    } catch (error) {
+      console.error('Error in handleGoogleLogin:', error);
+      throw error;
     }
-
-    const user = req.user as GoogleUser;
-
-    const token = this.jwtService.sign(
-      {
-        email: user.email,
-        name: user.name,
-        picture: user.picture,
-      },
-      {
-        secret: this.configService.get<string>('JWT_SECRET'),
-        expiresIn: '1h',
-      }
-    );
-
-    res.cookie('jwt', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 3600 * 1000, // 1시간
-      sameSite: 'strict',
-    });
-
-    res.redirect(`${this.configService.get<string>('FRONTEND_BASE_URL')}/`);
   }
 }

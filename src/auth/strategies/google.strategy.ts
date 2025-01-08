@@ -1,16 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, VerifyCallback } from 'passport-google-oauth20';
-import { AuthService } from '../auth.service';
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
-  constructor(private readonly authService: AuthService) {
+  constructor() {
     super({
-      clientID: process.env.GOOGLE_CLIENT_ID, // .env 파일에서 값 로드
+      clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: 'http://localhost:3000/auth/google/callback',
-      scope: ['email', 'profile'], // 필요한 권한 요청
+      callbackURL: `${process.env.BACKEND_BASE_URL}/auth/google/callback`,
+      scope: ['email', 'profile'],
     });
   }
 
@@ -20,7 +19,12 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     profile: any,
     done: VerifyCallback
   ): Promise<any> {
-    const user = await this.authService.validateUser(profile); // 사용자 정보 처리
-    done(null, user); // 사용자 정보를 반환
+    const { name, emails, photos } = profile;
+    const user = {
+      email: emails[0].value,
+      name: name.givenName,
+      picture: photos[0].value,
+    };
+    done(null, user);
   }
 }
