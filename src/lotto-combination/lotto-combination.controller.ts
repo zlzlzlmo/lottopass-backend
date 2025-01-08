@@ -12,6 +12,8 @@ import { LottoCombinationService } from './lotto-combination.service';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 import { UserEntity } from 'src/user/user.entity';
+import { FindAllResponse } from 'lottopass-shared';
+import { LottoCombinationEntity } from './lotto-combination.entity';
 
 @Controller('lotto-combination')
 @UseGuards(AuthGuard('jwt'))
@@ -21,12 +23,20 @@ export class LottoCombinationController {
   ) {}
 
   @Post('save')
-  async saveCombinations(
+  async saveCombination(
     @Req() req: Request,
-    @Body('combinations') combinations: number[]
-  ) {
+    @Body('combination') combination: number[]
+  ): Promise<FindAllResponse<LottoCombinationEntity>> {
     const user = req.user as UserEntity;
-    return this.lottoCombinationService.saveCombinations(user, combinations);
+    const data = await this.lottoCombinationService.saveCombinations(
+      user,
+      combination
+    );
+
+    return {
+      status: 'success',
+      data,
+    };
   }
 
   @Get()
