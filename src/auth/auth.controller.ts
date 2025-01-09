@@ -1,17 +1,21 @@
 import {
+  Body,
   Controller,
   Get,
+  Post,
   Req,
   Res,
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { AuthService, SocialUser } from './auth.service';
+import { AuthService } from './auth.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { Request, Response } from 'express';
 import { FindAllResponse, UserProfile } from 'lottopass-shared';
+import { RequestVerificationDto } from './dto/request-verification.dto';
+import { VerifyCodeDto } from './dto/verify-code.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -20,6 +24,24 @@ export class AuthController {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService
   ) {}
+
+  @Post('request-verification')
+  async requestVerificationCode(
+    @Body() dto: RequestVerificationDto
+  ): Promise<FindAllResponse<boolean>> {
+    console.log('dtod : ', dto);
+    await this.authService.requestVerificationCode(dto);
+    return { status: 'success', data: true };
+  }
+
+  @Post('verify-code')
+  async verifyCode(
+    @Body() dto: VerifyCodeDto
+  ): Promise<FindAllResponse<boolean>> {
+    await this.authService.verifyCode(dto);
+    return { status: 'success', data: true };
+  }
+
   @Get('me')
   getProfile(@Req() req: Request): FindAllResponse<UserProfile> {
     const jwt = req.cookies.jwt;
@@ -89,7 +111,7 @@ export class AuthController {
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
   async googleAuthRedirect(@Req() req: Request, @Res() res: Response) {
-    const googleUser = req.user as SocialUser;
+    const googleUser = req.user;
 
     await this.handleSocialRedirect(googleUser, res);
   }
@@ -97,7 +119,7 @@ export class AuthController {
   @Get('kakao/callback')
   @UseGuards(AuthGuard('kakao'))
   async kakaoAuthRedirect(@Req() req: Request, @Res() res: Response) {
-    const kakaoUser = req.user as SocialUser;
+    const kakaoUser = req.user;
 
     await this.handleSocialRedirect(kakaoUser, res);
   }
@@ -105,12 +127,12 @@ export class AuthController {
   @Get('naver/callback')
   @UseGuards(AuthGuard('naver'))
   async naverAuthRedirect(@Req() req: Request, @Res() res: Response) {
-    const naverUser = req.user as SocialUser;
+    const naverUser = req.user;
 
     await this.handleSocialRedirect(naverUser, res);
   }
 
-  private async handleSocialRedirect(user: SocialUser, res: Response) {
+  private async handleSocialRedirect(user, res: Response) {
     // try {
     //   const userData = await this.authService.handleSocialLogin(user);
     //   const token = this.jwtService.sign(

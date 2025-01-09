@@ -13,31 +13,13 @@ export class UserEntity {
   id: string;
 
   @Column({ type: 'varchar', unique: true })
-  phoneNumber: string;
-
-  @Column({ type: 'varchar', unique: true })
-  loginId: string;
-
-  @Column({ type: 'varchar' })
-  password: string;
-
-  @Column({ type: 'varchar' })
-  name: string;
+  email: string;
 
   @Column({ type: 'varchar', unique: true })
   nickname: string;
 
-  @Column({ type: 'int' })
-  birthYear: number;
-
-  @Column({ type: 'int' })
-  birthMonth: number;
-
-  @Column({ type: 'int' })
-  birthDay: number;
-
-  @Column({ type: 'enum', enum: ['male', 'female', 'other'] })
-  gender: string;
+  @Column({ type: 'varchar' })
+  password: string;
 
   @CreateDateColumn()
   createdAt: Date;

@@ -22,7 +22,7 @@ export class LottoCombinationRepository {
     combination: number[]
   ): Promise<LottoCombinationEntity> {
     const existingUser = await this.userRepository.findOne({
-      where: { loginId: user.loginId },
+      where: { email: user.email },
     });
 
     if (!existingUser) {

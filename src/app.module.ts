@@ -10,11 +10,20 @@ import { LocationModule } from './location/location.module';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { LottoCombinationModule } from './lotto-combination/lotto-combination.module';
-import { UserEntity } from './user/user.entity';
-import { LottoCombinationEntity } from './lotto-combination/lotto-combination.entity';
+import { CacheModule } from '@nestjs/cache-manager';
+import { redisStore } from 'cache-manager-redis-yet';
 
 @Module({
   imports: [
+    CacheModule.registerAsync({
+      isGlobal: true, // 전역 모듈로 설정
+      useFactory: async () => ({
+        store: await redisStore({
+          url: 'redis://localhost:6379', // Redis URL
+          ttl: 300, // 기본 TTL (초)
+        }),
+      }),
+    }),
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,

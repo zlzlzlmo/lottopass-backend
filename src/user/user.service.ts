@@ -1,45 +1,37 @@
 import { Injectable, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+
 import * as bcrypt from 'bcrypt';
-import { UserRepository } from './user.repository';
+import { UserEntity } from './user.entity';
+import { CreateUserDto } from './create-user.dto';
 
 @Injectable()
 export class UserService {
   constructor(
-    @InjectRepository(UserRepository)
-    private readonly userRepository: UserRepository
+    @InjectRepository(UserEntity)
+    private readonly userRepository: Repository<UserEntity>
   ) {}
 
-  async registerUser(userData: {
-    phoneNumber: string;
-    loginId: string;
-    password: string;
-    name: string;
-    nickname: string;
-    birthYear: number;
-    birthMonth: number;
-    birthDay: number;
-    gender: string;
-  }) {
-    const { phoneNumber, loginId, nickname, password } = userData;
+  async createUser(createUserDto: CreateUserDto): Promise<UserEntity> {
+    const { email, nickname, password } = createUserDto;
 
-    // 중복 확인
     const existingUser = await this.userRepository.findOne({
-      where: [{ phoneNumber }, { loginId }, { nickname }],
+      where: [{ email }, { nickname }],
     });
 
     if (existingUser) {
-      throw new ConflictException('중복된 정보가 있습니다.');
+      throw new ConflictException('이메일 또는 닉네임이 이미 사용 중입니다.');
     }
 
-    // 비밀번호 암호화
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = this.userRepository.create({
-      ...userData,
+    const newUser = this.userRepository.create({
+      email,
+      nickname,
       password: hashedPassword,
     });
 
-    return this.userRepository.save(user);
+    return this.userRepository.save(newUser);
   }
 }
