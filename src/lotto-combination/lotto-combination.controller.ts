@@ -40,18 +40,30 @@ export class LottoCombinationController {
   }
 
   @Get()
-  async getUserCombinations(@Req() req: Request) {
+  async getUserCombinations(
+    @Req() req: Request
+  ): Promise<FindAllResponse<LottoCombinationEntity[]>> {
     const user = req.user as UserEntity;
-    return this.lottoCombinationService.getUserCombinations(user.id);
+
+    const data = await this.lottoCombinationService.getUserCombinations(
+      user.id
+    );
+    return {
+      status: 'success',
+      data,
+    };
   }
 
   @Delete(':id')
   async deleteCombination(
     @Req() req: Request,
     @Param('id') combinationId: string
-  ) {
+  ): Promise<FindAllResponse<boolean>> {
     const user = req.user as UserEntity;
     await this.lottoCombinationService.deleteCombination(combinationId, user);
-    return { status: 'success' };
+    return {
+      status: 'success',
+      data: true,
+    };
   }
 }

@@ -1,8 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserEntity } from 'src/user/user.entity';
 import { Repository } from 'typeorm';
-import { GoogleUser } from './auth.controller';
+import { UserEntity } from 'src/user/user.entity';
+
+export interface SocialUser {
+  id: string;
+  email: string;
+  name: string;
+  picture: string;
+  provider: string; // 'Google', 'Kakao', 'Naver' 등
+}
 
 @Injectable()
 export class AuthService {
@@ -10,26 +17,32 @@ export class AuthService {
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>
   ) {}
-  async handleGoogleLogin(googleUserData: GoogleUser) {
-    const { email, name, picture } = googleUserData;
 
-    const user = await this.userRepository.findOne({
-      where: {
-        email,
-      },
-    });
+  async handleSocialLogin(socialUserData: SocialUser): Promise<UserEntity> {
+    const { id, email, name, picture, provider } = socialUserData;
 
-    if (!user) {
-      const newUser = this.userRepository.create({
-        email,
-        name,
-        picture,
-        provider: 'Google',
-      });
+    console.log('email :', socialUserData);
 
-      return await this.userRepository.save(newUser);
-    }
+    // const user = await this.userRepository.findOne({
+    //   where: { providerId: id },
+    // });
 
-    return user;
+    // if (!user) {
+    //   user = this.userRepository.create({
+    //     providerId: id,
+    //     email,
+    //     name,
+    //     picture,
+    //     provider,
+    //   });
+
+    //   return await this.userRepository.save(user);
+    // }
+
+    // user.providerId = id;
+    // user.name = name;
+    // user.picture = picture;
+    // user.provider = provider;
+    return;
   }
 }

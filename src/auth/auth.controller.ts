@@ -4,30 +4,22 @@ import {
   Req,
   Res,
   UnauthorizedException,
-  InternalServerErrorException,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { ConfigService } from '@nestjs/config';
+import { AuthService, SocialUser } from './auth.service';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 import { Request, Response } from 'express';
 import { FindAllResponse, UserProfile } from 'lottopass-shared';
-import { AuthService } from './auth.service';
-
-export interface GoogleUser {
-  email: string;
-  name: string;
-  picture: string;
-}
 
 @Controller('auth')
 export class AuthController {
   constructor(
+    private readonly authService: AuthService,
     private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
-    private readonly authService: AuthService
+    private readonly configService: ConfigService
   ) {}
-
   @Get('me')
   getProfile(@Req() req: Request): FindAllResponse<UserProfile> {
     const jwt = req.cookies.jwt;
@@ -38,9 +30,7 @@ export class AuthController {
 
     const jwtSecret = this.configService.get<string>('JWT_SECRET');
     if (!jwtSecret) {
-      throw new InternalServerErrorException(
-        'JWT_SECRET 환경 변수가 설정되지 않았습니다.'
-      );
+      throw new UnauthorizedException('JWT_SECRET이 설정되지 않았습니다.');
     }
 
     try {
@@ -72,50 +62,83 @@ export class AuthController {
     res.setHeader('Cache-Control', 'no-store');
     res.setHeader('Pragma', 'no-cache');
 
-    res.json({
+    return res.json({
       status: 'success',
-      redirect: `${this.configService.get<string>('FRONTEND_BASE_URL')}`,
+      message: '로그아웃되었습니다.',
     });
   }
 
   @Get('google')
   @UseGuards(AuthGuard('google'))
   async googleAuth() {
-    // 구글인증 시작
-    console.log('1');
+    // Google 로그인 페이지로 리디렉션
+  }
+
+  @Get('kakao')
+  @UseGuards(AuthGuard('kakao'))
+  async kakaoAuth() {
+    // Kakao OAuth 인증 시작
+  }
+
+  @Get('naver')
+  @UseGuards(AuthGuard('naver'))
+  async naverAuth() {
+    // Naver OAuth 인증 시작
   }
 
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
   async googleAuthRedirect(@Req() req: Request, @Res() res: Response) {
-    const googleUser = req.user as GoogleUser;
+    const googleUser = req.user as SocialUser;
 
-    try {
-      const user = await this.authService.handleGoogleLogin(googleUser);
-      // console.log('user db 완료');
-      const token = this.jwtService.sign(
-        {
-          email: user.email,
-          name: user.name,
-          picture: user.picture,
-        },
-        {
-          secret: this.configService.get<string>('JWT_SECRET'),
-          expiresIn: '1h',
-        }
-      );
+    await this.handleSocialRedirect(googleUser, res);
+  }
 
-      res.cookie('jwt', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: 3600 * 1000, // 1시간
-        sameSite: 'strict',
-      });
+  @Get('kakao/callback')
+  @UseGuards(AuthGuard('kakao'))
+  async kakaoAuthRedirect(@Req() req: Request, @Res() res: Response) {
+    const kakaoUser = req.user as SocialUser;
 
-      res.redirect(`${this.configService.get<string>('FRONTEND_BASE_URL')}/`);
-    } catch (error) {
-      console.error('Error in handleGoogleLogin:', error);
-      throw error;
-    }
+    await this.handleSocialRedirect(kakaoUser, res);
+  }
+
+  @Get('naver/callback')
+  @UseGuards(AuthGuard('naver'))
+  async naverAuthRedirect(@Req() req: Request, @Res() res: Response) {
+    const naverUser = req.user as SocialUser;
+
+    await this.handleSocialRedirect(naverUser, res);
+  }
+
+  private async handleSocialRedirect(user: SocialUser, res: Response) {
+    // try {
+    //   const userData = await this.authService.handleSocialLogin(user);
+    //   const token = this.jwtService.sign(
+    //     {
+    //       id: userData.providerId,
+    //       email: userData.email,
+    //       name: userData.name,
+    //       picture: userData.picture,
+    //     },
+    //     {
+    //       secret: this.configService.get<string>('JWT_SECRET'),
+    //       expiresIn: '1h',
+    //     }
+    //   );
+    //   res.cookie('jwt', token, {
+    //     httpOnly: true,
+    //     secure: process.env.NODE_ENV === 'production',
+    //     maxAge: 3600 * 1000, // 1시간
+    //     sameSite: 'strict',
+    //   });
+    //   res.redirect(`${this.configService.get<string>('FRONTEND_BASE_URL')}/`);
+    // } catch (error) {
+    //   console.error('Error during social login redirect:', error);
+    //   res.redirect(
+    //     `${this.configService.get<string>(
+    //       'FRONTEND_BASE_URL'
+    //     )}/login?error=true`
+    //   );
+    // }
   }
 }

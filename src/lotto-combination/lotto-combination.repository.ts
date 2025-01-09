@@ -22,7 +22,7 @@ export class LottoCombinationRepository {
     combination: number[]
   ): Promise<LottoCombinationEntity> {
     const existingUser = await this.userRepository.findOne({
-      where: { email: user.email },
+      where: { loginId: user.loginId },
     });
 
     if (!existingUser) {
@@ -44,6 +44,7 @@ export class LottoCombinationRepository {
   async findByUser(userId: string): Promise<LottoCombinationEntity[]> {
     return this.repository.find({
       where: { user: { id: userId } },
+      order: { createdAt: 'DESC' },
       relations: ['user'],
     });
   }
@@ -52,6 +53,14 @@ export class LottoCombinationRepository {
     combinationId: string,
     user: UserEntity
   ): Promise<void> {
-    await this.repository.delete({ id: combinationId, user });
+    const combination = await this.repository.findOne({
+      where: { id: combinationId, user: { id: user.id } },
+    });
+
+    if (!combination) {
+      throw new Error('Combination does not exist in the database.');
+    }
+
+    await this.repository.remove(combination);
   }
 }

@@ -6,12 +6,16 @@ import { GoogleStrategy } from './strategies/google.strategy';
 import { JwtService } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserService } from 'src/user/user.service';
-import { UserEntity } from 'src/user/user.entity';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { NaverStrategy } from './strategies/naver.strategy';
+import { KakaoStrategy } from './strategies/kakao.strategy';
+import { UserRepository } from 'src/user/user.repository';
+import { UserEntity } from 'src/user/user.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([UserEntity]),
+    TypeOrmModule.forFeature([UserRepository]),
     PassportModule.register({ defaultStrategy: 'google' }),
   ],
   controllers: [AuthController],
@@ -21,6 +25,8 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     JwtService,
     UserService,
     JwtStrategy,
+    NaverStrategy,
+    KakaoStrategy,
   ],
   exports: [AuthService],
 })
