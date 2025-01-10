@@ -25,10 +25,16 @@ export class DrawService {
   }
 
   async fetchAllDraws(): Promise<LottoDrawEntity[]> {
-    return await this.lottoRepository.find({
+    const draws = await this.lottoRepository.find({
       order: { drawNumber: 'DESC' },
     });
+
+    return draws.map((draw) => ({
+      ...draw,
+      winningNumbers: draw.winningNumbers.map(Number),
+    }));
   }
+
   async fetchLatestDraw(): Promise<LottoDraw> {
     const latestDrawFromDB = await this.lottoRepository.findOne({
       where: {},
