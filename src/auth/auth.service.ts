@@ -3,6 +3,7 @@ import {
   BadRequestException,
   HttpException,
   HttpStatus,
+  UnauthorizedException,
 } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 import { ConfigService } from '@nestjs/config';
@@ -11,12 +12,20 @@ import { Inject } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { RequestVerificationDto } from './dto/request-verification.dto';
 import { VerifyCodeDto } from './dto/verify-code.dto';
-
+import { LoginDto } from 'src/user/login-user.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { UserEntity } from 'src/user/user.entity';
+import { Repository } from 'typeorm';
+import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcrypt';
 @Injectable()
 export class AuthService {
   private transporter: nodemailer.Transporter;
 
   constructor(
+    @InjectRepository(UserEntity)
+    private readonly userRepository: Repository<UserEntity>,
+    private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache
   ) {
@@ -29,6 +38,19 @@ export class AuthService {
         pass: this.configService.get<string>('EMAIL_PASS'),
       },
     });
+  }
+
+  async login(loginDto: LoginDto): Promise<string> {
+    const { email, password } = loginDto;
+    const user = await this.userRepository.findOne({ where: { email } });
+
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      throw new UnauthorizedException(
+        '이메일 또는 비밀번호가 올바르지 않습니다.'
+      );
+    }
+
+    return this.jwtService.sign({ id: user.id, email: user.email });
   }
 
   // 이메일 발송 메서드
@@ -71,7 +93,7 @@ export class AuthService {
       verificationCode,
       300000
     );
-    console.log('sss : ', await this.cacheManager.get(`verification:${email}`));
+
     try {
       await this.sendEmail(
         email,
@@ -95,8 +117,6 @@ export class AuthService {
     const storedCode = await this.cacheManager.get<string>(
       `verification:${email}`
     );
-
-    console.log('storedCOde : ', storedCode);
 
     if (!storedCode || storedCode !== verificationCode) {
       throw new BadRequestException(

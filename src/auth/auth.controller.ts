@@ -8,7 +8,6 @@ import {
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -16,6 +15,7 @@ import { Request, Response } from 'express';
 import { FindAllResponse, UserProfile } from 'lottopass-shared';
 import { RequestVerificationDto } from './dto/request-verification.dto';
 import { VerifyCodeDto } from './dto/verify-code.dto';
+import { LoginDto } from 'src/user/login-user.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -73,20 +73,28 @@ export class AuthController {
     }
   }
 
-  @Get('logout')
-  async logout(@Res() res: Response) {
+  @Post('login')
+  async login(@Body() loginDto: LoginDto, @Res() res: Response): Promise<void> {
+    const token = await this.authService.login(loginDto);
+
+    res.cookie('accessToken', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 24 * 60 * 60 * 1000, // 1일
+    });
+
+    res.status(200).json({ message: '로그인 성공' });
+  }
+
+  @Post('logout')
+  logout(@Res() res: Response): void {
+    // this.authService.removeRefreshToken(refreshToken);
     res.clearCookie('jwt', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
     });
-
-    res.setHeader('Cache-Control', 'no-store');
-    res.setHeader('Pragma', 'no-cache');
-
-    return res.json({
-      status: 'success',
-      message: '로그아웃되었습니다.',
-    });
+    res.status(200).json({ message: '로그아웃 성공' });
   }
 }

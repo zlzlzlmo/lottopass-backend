@@ -1,4 +1,8 @@
-import { Injectable, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -6,12 +10,15 @@ import * as bcrypt from 'bcrypt';
 import { UserEntity } from './user.entity';
 import { CreateUserDto } from './create-user.dto';
 import { UpdateUserDto } from './update.user.dto';
+import { JwtService } from '@nestjs/jwt';
+import { LoginDto } from './login-user.dto';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(UserEntity)
-    private readonly userRepository: Repository<UserEntity>
+    private readonly userRepository: Repository<UserEntity>,
+    private readonly jwtService: JwtService
   ) {}
 
   async createUser(createUserDto: CreateUserDto): Promise<UserEntity> {
