@@ -12,7 +12,11 @@ import { AuthService } from './auth.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { Request, Response } from 'express';
-import { FindAllResponse, UserProfile } from 'lottopass-shared';
+import {
+  FindAllResponse,
+  SuccessResponse,
+  UserProfile,
+} from 'lottopass-shared';
 import { RequestVerificationDto } from './dto/request-verification.dto';
 import { VerifyCodeDto } from './dto/verify-code.dto';
 import { LoginDto } from 'src/user/login-user.dto';
@@ -44,8 +48,8 @@ export class AuthController {
 
   @Get('me')
   getProfile(@Req() req: Request): FindAllResponse<UserProfile> {
-    const jwt = req.cookies.jwt;
-
+    const jwt = req.cookies.accessToken;
+    console.log('jwt : ', jwt);
     if (!jwt) {
       throw new UnauthorizedException('로그인 상태가 아닙니다.');
     }
@@ -63,9 +67,9 @@ export class AuthController {
       return {
         status: 'success',
         data: {
-          name: payload.name,
+          id: payload.id,
           email: payload.email,
-          picture: payload.picture,
+          nickName: payload.nickName,
         },
       };
     } catch (error) {
@@ -75,6 +79,10 @@ export class AuthController {
 
   @Post('login')
   async login(@Body() loginDto: LoginDto, @Res() res: Response): Promise<void> {
+    console.log(
+      "configService.get<string>('JWT_SECRET') : ",
+      this.configService.get<string>('JWT_SECRET')
+    );
     const token = await this.authService.login(loginDto);
 
     res.cookie('accessToken', token, {
@@ -84,7 +92,12 @@ export class AuthController {
       maxAge: 24 * 60 * 60 * 1000, // 1일
     });
 
-    res.status(200).json({ message: '로그인 성공' });
+    const response: SuccessResponse<{ redirectUrl: string }> = {
+      status: 'success',
+      data: { redirectUrl: '/' },
+    };
+
+    res.status(200).json(response);
   }
 
   @Post('logout')

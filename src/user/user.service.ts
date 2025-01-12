@@ -11,7 +11,6 @@ import { UserEntity } from './user.entity';
 import { CreateUserDto } from './create-user.dto';
 import { UpdateUserDto } from './update.user.dto';
 import { JwtService } from '@nestjs/jwt';
-import { LoginDto } from './login-user.dto';
 
 @Injectable()
 export class UserService {
@@ -24,12 +23,15 @@ export class UserService {
   async createUser(createUserDto: CreateUserDto): Promise<UserEntity> {
     const { email, nickname, password } = createUserDto;
 
-    const existingUser = await this.userRepository.findOne({
-      where: [{ email }, { nickname }],
-    });
+    const isEmailTaken = await this.isEmailTaken(email);
+    const isNicknameTaken = await this.isNicknameTaken(nickname);
 
-    if (existingUser) {
-      throw new ConflictException('이메일 또는 닉네임이 이미 사용 중입니다.');
+    if (isEmailTaken) {
+      throw new ConflictException('이메일이 이미 사용 중입니다.');
+    }
+
+    if (isNicknameTaken) {
+      throw new ConflictException('닉네임 이미 사용 중입니다.');
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -68,5 +70,17 @@ export class UserService {
     }
 
     await this.userRepository.remove(user);
+  }
+
+  async isEmailTaken(email: string): Promise<boolean> {
+    const user = await this.userRepository.findOne({ where: { email } });
+    console.log('email : ', user);
+    return !!user;
+  }
+
+  async isNicknameTaken(nickname: string): Promise<boolean> {
+    const user = await this.userRepository.findOne({ where: { nickname } });
+    console.log('nickname : ', user);
+    return !!user;
   }
 }

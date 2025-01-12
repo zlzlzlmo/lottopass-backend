@@ -50,7 +50,16 @@ export class AuthService {
       );
     }
 
-    return this.jwtService.sign({ id: user.id, email: user.email });
+    try {
+      return this.jwtService.sign({
+        id: user.id,
+        email: user.email,
+        nickName: user.nickname,
+      });
+    } catch (error) {
+      console.error('Error signing JWT:', error);
+      throw new Error('JWT 생성 중 문제가 발생했습니다.');
+    }
   }
 
   // 이메일 발송 메서드

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
@@ -11,7 +11,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request: Request) => {
           console.log('Cookies:', request.cookies);
-          return request.cookies?.jwt;
+          return request.cookies?.accessToken;
         },
       ]),
       ignoreExpiration: false,
@@ -20,9 +20,16 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   }
 
   async validate(payload: any) {
-    return {
-      id: payload.id,
-      email: payload.email,
-    };
+    console.log('vali');
+    try {
+      return {
+        id: payload.id,
+        email: payload.email,
+        nickName: payload.nickName,
+      };
+    } catch (error) {
+      console.error('JWT validation error:', error);
+      throw new UnauthorizedException('유효하지 않은 JWT 토큰입니다.');
+    }
   }
 }
