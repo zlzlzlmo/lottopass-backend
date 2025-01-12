@@ -38,7 +38,7 @@ export class UserService {
 
     const newUser = this.userRepository.create({
       email,
-      nickname,
+      nickName: nickname,
       password: hashedPassword,
     });
 
@@ -55,7 +55,7 @@ export class UserService {
     }
 
     if (updateUserDto.email) user.email = updateUserDto.email;
-    if (updateUserDto.nickname) user.nickname = updateUserDto.nickname;
+    if (updateUserDto.nickName) user.nickName = updateUserDto.nickName;
     if (updateUserDto.password) {
       user.password = await bcrypt.hash(updateUserDto.password, 10);
     }
@@ -79,8 +79,19 @@ export class UserService {
   }
 
   async isNicknameTaken(nickname: string): Promise<boolean> {
-    const user = await this.userRepository.findOne({ where: { nickname } });
+    const user = await this.userRepository.findOne({
+      where: { nickName: nickname },
+    });
     console.log('nickname : ', user);
     return !!user;
+  }
+
+  async findByMe(id: string) {
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    return user;
   }
 }

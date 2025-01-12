@@ -16,7 +16,7 @@ export class UserEntity {
   email: string;
 
   @Column({ type: 'varchar', unique: true })
-  nickname: string;
+  nickName: string;
 
   @Column({ type: 'varchar' })
   password: string;

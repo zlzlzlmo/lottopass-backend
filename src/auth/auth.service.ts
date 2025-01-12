@@ -54,7 +54,7 @@ export class AuthService {
       return this.jwtService.sign({
         id: user.id,
         email: user.email,
-        nickName: user.nickname,
+        nickName: user.nickName,
       });
     } catch (error) {
       console.error('Error signing JWT:', error);

@@ -13,7 +13,7 @@ export class UpdateUserDto {
   @Matches(/^[a-zA-Z가-힣0-9]{2,10}$/, {
     message: '닉네임은 2~10자리 영문/한글/숫자만 가능합니다.',
   })
-  nickname?: string;
+  nickName?: string;
 
   @IsString()
   @IsOptional()
