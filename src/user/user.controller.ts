@@ -14,6 +14,7 @@ import { UserEntity } from './user.entity';
 import { Request } from 'express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UpdateUserDto } from './update.user.dto';
+import { ResetPasswordUserDto } from './\breset-password-user.dto';
 
 @Controller('users')
 export class UserController {
@@ -60,7 +61,7 @@ export class UserController {
 
   @Post('reset-password')
   async resetPassword(
-    @Body() { email, newPassword }: { email: string; newPassword: string }
+    @Body() { email, newPassword }: ResetPasswordUserDto
   ): Promise<FindAllResponse<boolean>> {
     const data = await this.userService.resetPassword(email, newPassword);
     return {
