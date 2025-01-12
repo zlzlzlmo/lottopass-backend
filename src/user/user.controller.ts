@@ -32,9 +32,12 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
-  async getProfile(@Req() req: Request): Promise<FindAllResponse<UserEntity>> {
+  async getProfile(
+    @Req() req: Request
+  ): Promise<FindAllResponse<Partial<UserEntity>>> {
     const userId = req.user['id'];
-    const data = await this.userService.findByMe(userId);
+
+    const data = await this.userService.findById(userId);
     return {
       status: 'success',
       data,
@@ -49,6 +52,17 @@ export class UserController {
   ): Promise<FindAllResponse<UserEntity>> {
     const userId = req.user['id'];
     const data = await this.userService.updateUser(userId, updateUserDto);
+    return {
+      status: 'success',
+      data,
+    };
+  }
+
+  @Post('reset-password')
+  async resetPassword(
+    @Body() { email, newPassword }: { email: string; newPassword: string }
+  ): Promise<FindAllResponse<boolean>> {
+    const data = await this.userService.resetPassword(email, newPassword);
     return {
       status: 'success',
       data,

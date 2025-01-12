@@ -2,6 +2,7 @@ import {
   Injectable,
   ConflictException,
   UnauthorizedException,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -21,16 +22,16 @@ export class UserService {
   ) {}
 
   async createUser(createUserDto: CreateUserDto): Promise<UserEntity> {
-    const { email, nickname, password } = createUserDto;
+    const { email, nickname: nickname, password } = createUserDto;
 
     const isEmailTaken = await this.isEmailTaken(email);
-    const isNicknameTaken = await this.isNicknameTaken(nickname);
+    const isnicknameTaken = await this.isnicknameTaken(nickname);
 
     if (isEmailTaken) {
       throw new ConflictException('이메일이 이미 사용 중입니다.');
     }
 
-    if (isNicknameTaken) {
+    if (isnicknameTaken) {
       throw new ConflictException('닉네임 이미 사용 중입니다.');
     }
 
@@ -38,7 +39,7 @@ export class UserService {
 
     const newUser = this.userRepository.create({
       email,
-      nickName: nickname,
+      nickname: nickname,
       password: hashedPassword,
     });
 
@@ -55,7 +56,7 @@ export class UserService {
     }
 
     if (updateUserDto.email) user.email = updateUserDto.email;
-    if (updateUserDto.nickName) user.nickName = updateUserDto.nickName;
+    if (updateUserDto.nickname) user.nickname = updateUserDto.nickname;
     if (updateUserDto.password) {
       user.password = await bcrypt.hash(updateUserDto.password, 10);
     }
@@ -78,20 +79,37 @@ export class UserService {
     return !!user;
   }
 
-  async isNicknameTaken(nickname: string): Promise<boolean> {
+  async isnicknameTaken(nickname: string): Promise<boolean> {
     const user = await this.userRepository.findOne({
-      where: { nickName: nickname },
+      where: { nickname: nickname },
     });
     console.log('nickname : ', user);
     return !!user;
   }
-
-  async findByMe(id: string) {
-    const user = await this.userRepository.findOne({ where: { id } });
+  async findById(id: string): Promise<Partial<UserEntity>> {
+    const user = await this.userRepository.findOne({
+      where: { id },
+      select: ['id', 'email', 'nickname'],
+    });
     if (!user) {
       throw new Error('User not found');
     }
-
     return user;
+  }
+
+  async resetPassword(email: string, newPassword: string): Promise<boolean> {
+    const user = await this.userRepository.findOne({ where: { email } });
+    if (!user) {
+      throw new NotFoundException('사용자를 찾을 수 없습니다.');
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    try {
+      await this.userRepository.save(user);
+      return true;
+    } catch (error) {
+      return false;
+    }
   }
 }

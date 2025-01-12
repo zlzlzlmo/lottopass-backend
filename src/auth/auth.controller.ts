@@ -69,7 +69,7 @@ export class AuthController {
         data: {
           id: payload.id,
           email: payload.email,
-          nickName: payload.nickName,
+          nickname: payload.nickname,
         },
       };
     } catch (error) {

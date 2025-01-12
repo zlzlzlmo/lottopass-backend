@@ -1,30 +1,23 @@
 import {
-  CanActivate,
-  ExecutionContext,
   Injectable,
+  ExecutionContext,
   UnauthorizedException,
 } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
+import { AuthGuard } from '@nestjs/passport';
 
 @Injectable()
-export class JwtAuthGuard implements CanActivate {
-  constructor(private reflector: Reflector) {}
+export class JwtAuthGuard extends AuthGuard('jwt') {
+  canActivate(context: ExecutionContext) {
+    console.log('JwtAuthGuard: 요청 처리 중...');
+    return super.canActivate(context);
+  }
 
-  canActivate(context: ExecutionContext): boolean {
-    const isPublic = this.reflector.get<boolean>(
-      'isPublic',
-      context.getHandler()
-    );
-    if (isPublic) {
-      return true;
+  handleRequest(err, user, info) {
+    if (err || !user) {
+      console.error('JwtAuthGuard 에러:', err || info);
+      throw err || new UnauthorizedException('유효하지 않은 토큰입니다.');
     }
-
-    const request = context.switchToHttp().getRequest();
-    const token = request.headers.authorization?.split(' ')[1];
-    if (!token) {
-      throw new UnauthorizedException('JWT 토큰이 필요합니다.');
-    }
-
-    return true;
+    console.log('JwtAuthGuard: 인증 성공');
+    return user;
   }
 }
