@@ -127,16 +127,18 @@ export class UserController {
     const user = await this.userService.findAllById(userId);
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('해당 유저를 찾을 수 없습니다.');
     }
 
     if (!password) {
-      throw new BadRequestException('Password is required');
+      throw new BadRequestException('비밀번호를 입력해주세요.');
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid password');
+      throw new UnauthorizedException(
+        '잘못된 비밀번호입니다. 다시 확인해주세요.'
+      );
     }
     await this.userService.deleteUser(userId);
 
