@@ -12,6 +12,8 @@ import { UserModule } from './user/user.module';
 import { LottoCombinationModule } from './lotto-combination/lotto-combination.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-yet';
+import { RecordModule } from './record/record.module';
+import { AuthGlobalModule } from './jwt-global.module';
 
 @Module({
   imports: [
@@ -24,6 +26,7 @@ import { redisStore } from 'cache-manager-redis-yet';
         }),
       }),
     }),
+    AuthGlobalModule,
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
@@ -51,6 +54,7 @@ import { redisStore } from 'cache-manager-redis-yet';
     AuthModule,
     UserModule,
     LottoCombinationModule,
+    RecordModule,
   ],
   controllers: [AppController],
   providers: [AppService],

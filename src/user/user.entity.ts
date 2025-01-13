@@ -1,4 +1,5 @@
 import { LottoCombinationEntity } from 'src/lotto-combination/lotto-combination.entity';
+import { RecordEntity } from 'src/record/record.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -32,4 +33,9 @@ export class UserEntity {
     }
   )
   lottoCombinations: LottoCombinationEntity[];
+
+  @OneToMany(() => RecordEntity, (record) => record.user, {
+    cascade: true,
+  })
+  records: RecordEntity[];
 }
