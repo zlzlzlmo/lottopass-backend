@@ -40,6 +40,26 @@ export class AuthService {
     });
   }
 
+  generateJwtToken(
+    user: Pick<UserEntity, 'id' | 'email' | 'nickname'>
+  ): string {
+    const payload = {
+      id: user.id,
+      email: user.email,
+      nickname: user.nickname,
+    };
+
+    try {
+      return this.jwtService.sign(payload);
+    } catch (error: any) {
+      console.error('JWT 생성 중 에러 발생:', {
+        payload,
+        error: error.message,
+      });
+      throw new Error(`JWT 생성 실패: ${error.message}`);
+    }
+  }
+
   async login(loginDto: LoginDto): Promise<string> {
     const { email, password } = loginDto;
     const user = await this.userRepository.findOne({ where: { email } });
@@ -51,11 +71,13 @@ export class AuthService {
     }
 
     try {
-      return this.jwtService.sign({
+      const token = this.generateJwtToken({
         id: user.id,
         email: user.email,
         nickname: user.nickname,
       });
+
+      return token;
     } catch (error) {
       console.error('Error signing JWT:', error);
       throw new Error('JWT 생성 중 문제가 발생했습니다.');

@@ -47,9 +47,11 @@ export class AuthController {
   }
 
   @Get('me')
-  getProfile(@Req() req: Request): FindAllResponse<UserProfile> {
+  getProfile(
+    @Req() req: Request
+  ): FindAllResponse<Pick<UserProfile, 'email' | 'nickname'>> {
     const jwt = req.cookies.accessToken;
-    console.log('jwt : ', jwt);
+
     if (!jwt) {
       throw new UnauthorizedException('로그인 상태가 아닙니다.');
     }
@@ -67,7 +69,6 @@ export class AuthController {
       return {
         status: 'success',
         data: {
-          id: payload.id,
           email: payload.email,
           nickname: payload.nickname,
         },
@@ -79,10 +80,6 @@ export class AuthController {
 
   @Post('login')
   async login(@Body() loginDto: LoginDto, @Res() res: Response): Promise<void> {
-    console.log(
-      "configService.get<string>('JWT_SECRET') : ",
-      this.configService.get<string>('JWT_SECRET')
-    );
     const token = await this.authService.login(loginDto);
 
     res.cookie('accessToken', token, {
@@ -99,15 +96,26 @@ export class AuthController {
 
     res.status(200).json(response);
   }
-
   @Post('logout')
-  logout(@Res() res: Response): void {
-    // this.authService.removeRefreshToken(refreshToken);
-    res.clearCookie('jwt', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-    });
-    res.status(200).json({ message: '로그아웃 성공' });
+  async logout(@Res() res: Response): Promise<void> {
+    try {
+      res.clearCookie('accessToken', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+      });
+
+      const response: SuccessResponse<{ redirectUrl: string }> = {
+        status: 'success',
+        data: { redirectUrl: '/' },
+      };
+
+      res.status(200).json(response);
+    } catch (error) {
+      res.status(500).json({
+        status: 'error',
+        message: '로그아웃에 실패했습니다.',
+      });
+    }
   }
 }

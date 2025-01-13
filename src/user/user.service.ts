@@ -1,8 +1,8 @@
 import {
   Injectable,
   ConflictException,
-  UnauthorizedException,
   NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -11,14 +11,12 @@ import * as bcrypt from 'bcrypt';
 import { UserEntity } from './user.entity';
 import { CreateUserDto } from './create-user.dto';
 import { UpdateUserDto } from './update.user.dto';
-import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(UserEntity)
-    private readonly userRepository: Repository<UserEntity>,
-    private readonly jwtService: JwtService
+    private readonly userRepository: Repository<UserEntity>
   ) {}
 
   async createUser(createUserDto: CreateUserDto): Promise<UserEntity> {
@@ -50,18 +48,33 @@ export class UserService {
     id: string,
     updateUserDto: UpdateUserDto
   ): Promise<UserEntity> {
+    // 기존 사용자 검색
     const user = await this.userRepository.findOne({ where: { id } });
     if (!user) {
-      throw new Error('User not found');
+      throw new NotFoundException('User not found');
     }
 
-    if (updateUserDto.email) user.email = updateUserDto.email;
-    if (updateUserDto.nickname) user.nickname = updateUserDto.nickname;
+    if (updateUserDto.nickname) {
+      user.nickname = updateUserDto.nickname;
+    }
+
     if (updateUserDto.password) {
+      const isSamePassword = await bcrypt.compare(
+        updateUserDto.password,
+        user.password
+      );
+      if (isSamePassword) {
+        throw new BadRequestException(
+          '새 비밀번호는 기존 비밀번호와 달라야 합니다.'
+        );
+      }
+
       user.password = await bcrypt.hash(updateUserDto.password, 10);
     }
 
-    return this.userRepository.save(user);
+    await this.userRepository.save(user);
+
+    return user;
   }
 
   async deleteUser(id: string): Promise<void> {
@@ -75,7 +88,6 @@ export class UserService {
 
   async isEmailTaken(email: string): Promise<boolean> {
     const user = await this.userRepository.findOne({ where: { email } });
-    console.log('email : ', user);
     return !!user;
   }
 
@@ -90,6 +102,17 @@ export class UserService {
     const user = await this.userRepository.findOne({
       where: { id },
       select: ['id', 'email', 'nickname'],
+    });
+    if (!user) {
+      throw new Error('User not found');
+    }
+    return user;
+  }
+
+  async findAllById(id: string): Promise<Partial<UserEntity>> {
+    const user = await this.userRepository.findOne({
+      where: { id },
+      select: ['id', 'email', 'nickname', 'password'],
     });
     if (!user) {
       throw new Error('User not found');
