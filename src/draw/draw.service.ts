@@ -54,10 +54,7 @@ export class DrawService {
 
       return await this.lottoRepository.save(mappedData);
     } catch (error) {
-      throw new HttpException(
-        'An unexpected error occurred while fetching Lotto data',
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
+      return latestDrawFromDB;
     }
   }
 
