@@ -4,19 +4,13 @@ import {
   Get,
   Post,
   Req,
-  Res,
   UnauthorizedException,
-  UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { Request, Response } from 'express';
-import {
-  FindAllResponse,
-  SuccessResponse,
-  UserProfile,
-} from 'lottopass-shared';
+import { Request } from 'express';
+import { FindAllResponse, UserProfile } from 'lottopass-shared';
 import { RequestVerificationDto } from './dto/request-verification.dto';
 import { VerifyCodeDto } from './dto/verify-code.dto';
 import { LoginDto } from 'src/user/login-user.dto';
@@ -49,11 +43,12 @@ export class AuthController {
   getProfile(
     @Req() req: Request
   ): FindAllResponse<Pick<UserProfile, 'email' | 'nickname'>> {
-    const jwt = req.cookies.accessToken;
-
-    if (!jwt) {
-      throw new UnauthorizedException('로그인 상태가 아닙니다.');
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      throw new UnauthorizedException('Authorization 헤더가 없습니다.');
     }
+
+    const jwt = authHeader.split(' ')[1];
 
     const jwtSecret = this.configService.get<string>('JWT_SECRET');
     if (!jwtSecret) {
@@ -65,6 +60,7 @@ export class AuthController {
         secret: jwtSecret,
       });
 
+      // 사용자 정보 반환
       return {
         status: 'success',
         data: {
@@ -78,43 +74,16 @@ export class AuthController {
   }
 
   @Post('login')
-  async login(@Body() loginDto: LoginDto, @Res() res: Response): Promise<void> {
+  async login(
+    @Body() loginDto: LoginDto
+  ): Promise<FindAllResponse<{ token: string }>> {
     const token = await this.authService.login(loginDto);
 
-    res.cookie('accessToken', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // 배포 환경에서만 HTTPS 필요
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 로컬에서는 lax
-      maxAge: 24 * 60 * 60 * 1000, // 1일
-    });
-
-    const response: SuccessResponse<{ redirectUrl: string; token: string }> = {
+    return {
       status: 'success',
-      data: { redirectUrl: '/', token },
+      data: {
+        token,
+      },
     };
-
-    res.status(200).json(response);
-  }
-  @Post('logout')
-  async logout(@Res() res: Response): Promise<void> {
-    try {
-      res.clearCookie('accessToken', {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production', // 배포 환경에서만 secure 적용
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 로그인 시와 동일한 sameSite 설정
-      });
-
-      const response: SuccessResponse<{ redirectUrl: string }> = {
-        status: 'success',
-        data: { redirectUrl: '/' },
-      };
-
-      res.status(200).json(response);
-    } catch (error) {
-      res.status(500).json({
-        status: 'error',
-        message: '로그아웃에 실패했습니다.',
-      });
-    }
   }
 }

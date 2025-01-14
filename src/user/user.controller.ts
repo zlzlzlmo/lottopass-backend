@@ -14,7 +14,7 @@ import {
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './create-user.dto';
-import { FindAllResponse } from 'lottopass-shared';
+import { FindAllResponse, UserProfile } from 'lottopass-shared';
 import { UserEntity } from './user.entity';
 import { Request, Response } from 'express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -60,33 +60,31 @@ export class UserController {
   @Put('update-profile')
   async updateProfile(
     @Req() req: Request,
-    @Res() res: Response,
     @Body() updateUserDto: UpdateUserDto
-  ): Promise<void> {
+  ): Promise<FindAllResponse<{ user: UserProfile; token: string }>> {
     const userId = req.user['id'];
 
+    // 사용자 정보 업데이트
     const updatedUser = await this.userService.updateUser(
       userId,
       updateUserDto
     );
 
+    // 새 JWT 발급
     const newToken = this.authService.generateJwtToken({
       id: updatedUser.id,
       email: updatedUser.email,
       nickname: updatedUser.nickname,
     });
 
-    res.cookie('accessToken', newToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // 배포 환경에서만 HTTPS 필요
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 로컬에서는 lax
-      maxAge: 24 * 60 * 60 * 1000, // 1일
-    });
-
-    res.status(200).json({
+    // JSON 형태로 사용자 데이터와 토큰 반환
+    return {
       status: 'success',
-      data: updatedUser,
-    });
+      data: {
+        user: updatedUser,
+        token: newToken, // 클라이언트에서 저장할 JWT
+      },
+    };
   }
 
   @Post('reset-password')
@@ -142,12 +140,6 @@ export class UserController {
       );
     }
     await this.userService.deleteUser(userId);
-
-    res.clearCookie('accessToken', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-    });
 
     res.status(200).json({ status: 'success', data: true });
   }

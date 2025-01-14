@@ -10,6 +10,7 @@ async function bootstrap() {
   app.enableCors({
     origin: (origin, callback) => {
       const allowedOrigins = [
+        'https://localhost:5173',
         'http://localhost:5173',
         'https://www.lottopass.co.kr',
         'http://localhost:4173',
