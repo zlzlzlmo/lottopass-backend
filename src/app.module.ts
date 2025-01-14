@@ -18,12 +18,18 @@ import { AuthGlobalModule } from './jwt-global.module';
 @Module({
   imports: [
     CacheModule.registerAsync({
-      isGlobal: true, // 전역 모듈로 설정
-      useFactory: async () => ({
+      isGlobal: true,
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
         store: await redisStore({
-          url: 'redis://localhost:6379', // Redis URL
-          ttl: 300, // 기본 TTL (초)
+          url: `redis://default:${configService.get<string>(
+            'REDIS_PASSWORD'
+          )}@${configService.get<string>(
+            'REDIS_HOST'
+          )}:${configService.get<number>('REDIS_PORT')}`,
         }),
+        ttl: configService.get<number>('REDIS_TTL', 300),
       }),
     }),
     AuthGlobalModule,
