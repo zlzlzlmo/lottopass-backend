@@ -89,9 +89,9 @@ export class AuthController {
       maxAge: 24 * 60 * 60 * 1000, // 1일
     });
 
-    const response: SuccessResponse<{ redirectUrl: string }> = {
+    const response: SuccessResponse<{ redirectUrl: string; token: string }> = {
       status: 'success',
-      data: { redirectUrl: '/' },
+      data: { redirectUrl: '/', token },
     };
 
     res.status(200).json(response);
