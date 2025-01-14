@@ -19,9 +19,10 @@ import { UserEntity } from './user.entity';
 import { Request, Response } from 'express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UpdateUserDto } from './update.user.dto';
-import { ResetPasswordUserDto } from './\breset-password-user.dto';
+
 import { AuthService } from 'src/auth/auth.service';
 import * as bcrypt from 'bcrypt';
+import { ResetPasswordUserDto } from './reset-password-user.dto';
 
 @Controller('users')
 export class UserController {
