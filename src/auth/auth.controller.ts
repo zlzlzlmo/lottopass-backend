@@ -100,8 +100,8 @@ export class AuthController {
     try {
       res.clearCookie('accessToken', {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
+        secure: process.env.NODE_ENV === 'production', // 배포 환경에서만 secure 적용
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 로그인 시와 동일한 sameSite 설정
       });
 
       const response: SuccessResponse<{ redirectUrl: string }> = {
