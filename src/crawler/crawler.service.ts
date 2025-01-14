@@ -95,6 +95,7 @@ export class CrawlerService {
       'https://www.dhlottery.co.kr/store.do?method=topStore&pageGubun=L645';
     const url = `${BASE_URL}&drwNo=${drawNumber}`;
     const html = await this.fetchPage(url);
+
     const pageData = await this.parseFirstPrizePage(
       html,
       drawNumber.toString()
@@ -143,7 +144,7 @@ export class CrawlerService {
         where: { drawNumber },
       });
 
-      if (existingData.length > 0) {
+      if (existingData[0].prizePerWinner > 0 && existingData.length > 0) {
         return existingData;
       }
 
@@ -215,6 +216,7 @@ export class CrawlerService {
     const firstPrizeTable = $(
       '.group_content .group_title:contains("1등 배출점")'
     ).next('table');
+    console.log('firstPrizeTable : ', firstPrizeTable);
 
     for (const row of firstPrizeTable.find('tbody tr')) {
       const name = $(row).find('td:nth-child(2)').text().trim();

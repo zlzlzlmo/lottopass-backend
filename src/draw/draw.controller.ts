@@ -24,27 +24,31 @@ export class DrawController {
   async getLatestDrawInfo(): Promise<FindAllResponse<LottoDrawEntity>> {
     const data = await this.drawService.fetchLatestDraw();
 
-    // 최신 회차의 당첨 매장이 이미 존재하는지 확인
-    const isExist = await this.regionService.findWinningStoresByDrawNumber(
-      data.drawNumber
-    );
-
-    // 당첨 매장이 없으면 크롤링 실행
-    if (!isExist) {
-      const winningStores = await this.crawlerService.crawlFirstPrize(
+    try {
+      // 최신 회차의 당첨 매장이 이미 존재하는지 확인
+      const isExist = await this.regionService.findWinningStoresByDrawNumber(
         data.drawNumber
       );
 
-      if (!winningStores) {
-        console.error('Failed to crawl winning stores');
-        throw new Error('Failed to retrieve winning stores');
-      }
-    }
+      // 당첨 매장이 없으면 크롤링 실행
+      if (!isExist) {
+        const winningStores = await this.crawlerService.crawlFirstPrize(
+          data.drawNumber
+        );
 
-    return {
-      status: 'success',
-      data,
-    };
+        if (!winningStores) {
+          console.error('Failed to crawl winning stores');
+          throw new Error('Failed to retrieve winning stores');
+        }
+      }
+    } catch (error) {
+    } finally {
+      if (data)
+        return {
+          status: 'success',
+          data,
+        };
+    }
   }
 
   @Get('all')
