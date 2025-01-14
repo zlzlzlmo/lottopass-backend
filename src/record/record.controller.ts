@@ -15,11 +15,15 @@ import { RecordService } from './record.service';
 import { CreateRecordDto } from './dto/create-record.dto';
 import { FindAllResponse } from 'lottopass-shared';
 import { RecordEntity } from './record.entity';
+import { UserService } from 'src/user/user.service';
 
 @Controller('record')
 @UseGuards(JwtAuthGuard)
 export class RecordController {
-  constructor(private readonly recordsService: RecordService) {}
+  constructor(
+    private readonly recordsService: RecordService,
+    private readonly userService: UserService
+  ) {}
 
   @Post('/create')
   async create(
@@ -27,16 +31,30 @@ export class RecordController {
     @Body() createRecordDto: CreateRecordDto
   ): Promise<FindAllResponse<RecordEntity>> {
     const userId = req.user.id;
-    const { transactionId } = createRecordDto;
-    const isTaken = await this.recordsService.findOne(userId, transactionId);
 
-    if (isTaken) throw new BadRequestException('이미 등록된 거래번호입니다.');
+    try {
+      const user = await this.userService.findAllById(userId);
+      const { transactionId } = createRecordDto;
 
-    const data = await this.recordsService.create(userId, createRecordDto);
-    return {
-      status: 'success',
-      data,
-    };
+      const isTaken = await this.recordsService.findOne(user, transactionId);
+      if (isTaken) {
+        throw new BadRequestException(
+          `이미 등록된 거래번호입니다. User ID: ${userId}, Transaction ID: ${transactionId}`
+        );
+      }
+
+      const data = await this.recordsService.create(userId, createRecordDto);
+      return {
+        status: 'success',
+        data,
+      };
+    } catch (error) {
+      console.error('Error creating record:', error);
+
+      if (error instanceof Error) {
+        throw new BadRequestException(error.message);
+      }
+    }
   }
 
   @Get('/all')

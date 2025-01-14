@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { RecordEntity } from './record.entity';
 import { CreateRecordDto } from './dto/create-record.dto';
+import { UserEntity } from 'src/user/user.entity';
 
 @Injectable()
 export class RecordService {
@@ -22,11 +23,11 @@ export class RecordService {
     return await this.recordsRepository.save(record);
   }
 
-  async findOne(id: string, transactionId: string) {
-    const isTaken = this.recordsRepository.findOne({
+  async findOne(user: UserEntity, transactionId: string) {
+    const isTaken = await this.recordsRepository.findOne({
       where: {
         transactionId,
-        id,
+        user: { id: user.id },
       },
     });
 

@@ -7,7 +7,6 @@ import {
   ManyToOne,
   CreateDateColumn,
   UpdateDateColumn,
-  PrimaryColumn,
 } from 'typeorm';
 
 @Entity('record')
@@ -21,7 +20,7 @@ export class RecordEntity {
   @Column()
   drawNumber: number;
 
-  @PrimaryColumn()
+  @Column()
   transactionId: string;
 
   @Column('json')

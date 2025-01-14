@@ -109,7 +109,7 @@ export class UserService {
     return user;
   }
 
-  async findAllById(id: string): Promise<Partial<UserEntity>> {
+  async findAllById(id: string): Promise<UserEntity> {
     const user = await this.userRepository.findOne({
       where: { id },
       select: ['id', 'email', 'nickname', 'password'],
