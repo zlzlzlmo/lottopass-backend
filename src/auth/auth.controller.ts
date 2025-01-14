@@ -33,7 +33,6 @@ export class AuthController {
   async requestVerificationCode(
     @Body() dto: RequestVerificationDto
   ): Promise<FindAllResponse<boolean>> {
-    console.log('dtod : ', dto);
     await this.authService.requestVerificationCode(dto);
     return { status: 'success', data: true };
   }
@@ -83,9 +82,10 @@ export class AuthController {
     const token = await this.authService.login(loginDto);
 
     res.cookie('accessToken', token, {
+      domain: 'lottopass.co.kr',
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: process.env.NODE_ENV === 'production', // 배포 환경에서만 secure 적용
+      sameSite: 'none',
       maxAge: 24 * 60 * 60 * 1000, // 1일
     });
 

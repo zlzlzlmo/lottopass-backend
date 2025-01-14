@@ -77,9 +77,10 @@ export class UserController {
     });
 
     res.cookie('accessToken', newToken, {
+      domain: 'lottopass.co.kr',
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: process.env.NODE_ENV === 'production', // 배포 환경에서만 secure 적용
+      sameSite: 'none',
       maxAge: 24 * 60 * 60 * 1000, // 1일
     });
 
